@@ -1,10 +1,11 @@
 # https://moonrepo.dev/docs/config/project
 $schema: "https://moonrepo.dev/schemas/project.json"
-id: frontend
+id: kickbase/frontend
 project:
-  name: "frontend"
+  name: "kickbase/frontend"
   description: "Frontend for kickbase"
 tags:
+  - "kickbase"
   - "frontend"
   - "bun"
 type: "application"

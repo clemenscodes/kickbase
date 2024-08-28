@@ -1,16 +1,17 @@
 # https://moonrepo.dev/docs/config/project
 $schema: "https://moonrepo.dev/schemas/project.json"
-id: backend
+id: kickbase/backend
 project:
-  name: "backend"
+  name: "kickbase/backend"
   description: "Backend for kickbase"
 tags:
+  - "kickbase"
   - "backend"
   - "rust"
 type: "application"
 tasks:
   build:
-    command: "make"
+    command: "make build"
     platform: "system"
     options:
       cache: false
@@ -20,11 +21,114 @@ tasks:
       - 'src/**/*'
     outputs:
       - 'target/'
-  clean:
-    command: "make clean"
+  release:
+    command: "make release"
     platform: "system"
     options:
       cache: false
       outputStyle: "stream"
       windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+    outputs:
+      - 'target/release/'
+  run:
+    command: "make run"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  run-release:
+    command: "make run-release"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  test:
+    command: "make test"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  test-all:
+    command: "make test-all"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  fmt:
+    command: "make fmt"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  lint:
+    command: "make lint"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  doc:
+    command: "make doc"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  install:
+    command: "make install"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  uninstall:
+    command: "make uninstall"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  dist-clean:
+    command: "make dist-clean"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+  help:
+    command: "make help"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
 
