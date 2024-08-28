@@ -1,19 +1,12 @@
-# Makefile for a Rust project using Cargo with cross-platform support
+BINARY_NAME := kickbase
 
-# Define the binary name
-# Update this to match the binary name specified in your Cargo.toml
-BINARY_NAME := kickbase-api
-
-# Detect the operating system
 ifeq ($(OS),Windows_NT)
-    # Windows-specific commands
     CARGO := cargo
     RM := del /Q
     RMDIR := rmdir /S /Q
     EXEC := $(BINARY_NAME).exe
     SHELL := powershell.exe
 else
-    # Unix-like commands
     CARGO := cargo
     RM := rm -f
     RMDIR := rm -rf
@@ -21,62 +14,47 @@ else
     SHELL := /bin/sh
 endif
 
-# Default target
 all: build
 
-# Build the project
 build:
 	$(CARGO) build
 
-# Build the project with optimizations for release
 release:
 	$(CARGO) build --release
 
-# Run the project
 run:
 	$(CARGO) run
 
-# Run the project in release mode
 run-release:
 	$(CARGO) run --release
 
-# Run tests for the project
 test:
 	$(CARGO) test
 
-# Run tests with all features enabled
 test-all:
 	$(CARGO) test --all-features
 
-# Check the code for formatting issues
 fmt:
 	$(CARGO) fmt
 
-# Lint the code with Clippy
 lint:
 	$(CARGO) clippy
 
-# Clean the project
 clean:
 	$(CARGO) clean
 
-# Generate documentation
 doc:
 	$(CARGO) doc --open
 
-# Install the binary
 install:
 	$(CARGO) install --path .
 
-# Uninstall the binary
 uninstall:
 	$(CARGO) uninstall $(BINARY_NAME)
 
-# Remove all build artifacts, including documentation and generated files
 dist-clean: clean
 	$(RMDIR) target/doc
 
-# Display help information
 help:
 	@echo "Usage: make [target]"
 	@echo
@@ -98,4 +76,3 @@ help:
 	@echo "  help           Display this help message"
 
 .PHONY: all build release run run-release test test-all fmt lint clean doc install uninstall dist-clean help
-
