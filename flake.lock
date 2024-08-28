@@ -43,11 +43,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1724828144,
-        "narHash": "sha256-mTLDs0Yg1rOGVVjX+Ov0uMSEvlLldZCusMZFSAqooL0=",
+        "lastModified": 1724875405,
+        "narHash": "sha256-Y06WYCccmx0zK+BFhqFgPMnRgeBy5/ZOmOEVx6q0hm0=",
         "owner": "cymenix",
         "repo": "lpi",
-        "rev": "24dc9f4d7b2f5cf8dc2137e5e2e33e9b1ad1c195",
+        "rev": "68ad1b3c84b53ba1e425b595f0555f68ba9d29d3",
         "type": "github"
       },
       "original": {
