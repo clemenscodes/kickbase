@@ -1,0 +1,17 @@
+# https://moonrepo.dev/docs/config/project
+$schema: "https://moonrepo.dev/schemas/project.json"
+id: kickbase
+project:
+  name: "kickbase"
+  description: "Kickbase"
+tags:
+  - "kickbase"
+type: "application"
+tasks:
+  lpi:
+    command: "Start-Process powershell -ArgumentList { $env:MOON = '$env:PWD'; lpi } -NoNewWindow -Wait"
+    platform: "system"
+    options:
+      outputStyle: "stream"
+      cache: false
+      windowsShell: "pwsh"

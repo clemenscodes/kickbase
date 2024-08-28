@@ -13,6 +13,7 @@ telemetry: false
 # and cannot reference projects located outside the workspace boundary.
 projects:
   - "**/*/moon.yml"
+  - "moon.yml"
 
 vcs:
   manager: "git"
