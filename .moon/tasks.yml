@@ -1,0 +1,20 @@
+# https://moonrepo.dev/docs/config/tasks
+$schema: "https://moonrepo.dev/schemas/tasks.json"
+implicitInputs:
+  - "/flake.nix"
+  - "/flake.lock"
+tasks:
+  shell:
+    command: "nom develop -c $SHELL"
+    platform: "system"
+    options:
+      outputStyle: "stream"
+      cache: false
+      shell: true
+  edit:
+    command: "nvim ."
+    platform: "system"
+    options:
+      outputStyle: "stream"
+      cache: false
+      shell: true
