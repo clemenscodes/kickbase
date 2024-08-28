@@ -1,5 +1,6 @@
 .moon/cache
 .moon/docker
-.direnv
+**/.direnv
 **/target
 **/dist
+**/result
