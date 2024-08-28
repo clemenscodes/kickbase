@@ -28,8 +28,10 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
     outputs:
-      - "target/release/"
+      - "target/"
   run:
     command: "make run"
     platform: "system"
@@ -39,6 +41,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   run-release:
     command: "make run-release"
     platform: "system"
@@ -48,6 +52,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   test:
     command: "make test"
     platform: "system"
@@ -57,6 +63,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   test-all:
     command: "make test-all"
     platform: "system"
@@ -66,6 +74,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   fmt:
     command: "make fmt"
     platform: "system"
@@ -75,6 +85,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   lint:
     command: "make lint"
     platform: "system"
@@ -84,6 +96,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   doc:
     command: "make doc"
     platform: "system"
@@ -93,6 +107,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   install:
     command: "make install"
     platform: "system"
@@ -102,6 +118,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   uninstall:
     command: "make uninstall"
     platform: "system"
@@ -111,6 +129,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   dist-clean:
     command: "make dist-clean"
     platform: "system"
@@ -120,6 +140,8 @@ tasks:
       windowsShell: "pwsh"
     inputs:
       - "src/**/*"
+      - "assets/**/*"
+      - "templates/**/*"
   help:
     command: "make help"
     platform: "system"
@@ -127,8 +149,6 @@ tasks:
       cache: false
       outputStyle: "stream"
       windowsShell: "pwsh"
-    inputs:
-      - "src/**/*"
   lpi:
     command: "lpi"
     platform: "system"
