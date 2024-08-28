@@ -1,0 +1,30 @@
+# https://moonrepo.dev/docs/config/project
+$schema: "https://moonrepo.dev/schemas/project.json"
+id: frontend
+project:
+  name: "frontend"
+  description: "Frontend for kickbase"
+tags:
+  - "frontend"
+  - "bun"
+type: "application"
+tasks:
+  build:
+    command: "make"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+    outputs:
+      - 'dist/'
+  clean:
+    command: "make clean"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+

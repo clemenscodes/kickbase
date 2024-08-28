@@ -1,0 +1,30 @@
+# https://moonrepo.dev/docs/config/project
+$schema: "https://moonrepo.dev/schemas/project.json"
+id: backend
+project:
+  name: "backend"
+  description: "Backend for kickbase"
+tags:
+  - "backend"
+  - "rust"
+type: "application"
+tasks:
+  build:
+    command: "make"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+    inputs:
+      - 'src/**/*'
+    outputs:
+      - 'target/'
+  clean:
+    command: "make clean"
+    platform: "system"
+    options:
+      cache: false
+      outputStyle: "stream"
+      windowsShell: 'pwsh'
+
