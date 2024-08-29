@@ -1,97 +1,60 @@
-use askama::Template;
-use axum::{
-  http::StatusCode,
-  response::{Html, IntoResponse, Response},
-  routing::get,
-  Router,
-};
+mod constants;
+mod html;
+mod router;
+mod templates;
+
+use router::create_router;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use tower_http::services::ServeDir;
-use tracing::{debug, info};
+use tracing::{debug, error, info};
 use tracing_subscriber::{
   fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter,
 };
 
-const KICKBASE_API_ENDPOINT: &str = "https://api.kickbase.com";
-
-#[derive(Template)]
-#[template(path = "pages/home.html")]
-struct Home<'a> {
-  api: &'a str,
-}
-
-async fn home() -> impl IntoResponse {
-  let template = Home {
-    api: KICKBASE_API_ENDPOINT,
-  };
-  HtmlTemplate(template)
-}
-
-struct HtmlTemplate<T>(T);
-
-impl<T> IntoResponse for HtmlTemplate<T>
-where
-  T: Template,
-{
-  fn into_response(self) -> Response {
-    match self.0.render() {
-      Ok(html) => Html(html).into_response(),
-      Err(err) => {
-        let code = StatusCode::INTERNAL_SERVER_ERROR;
-        let message = format!("Failed to render template. Error: {}", err);
-        (code, message).into_response()
-      }
-    }
-  }
-}
-
-fn router() -> Router {
-  let assets_path = std::env::current_dir().unwrap();
-  Router::new().route("/", get(home)).nest_service(
-    "/assets",
-    ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
-  )
-}
-
-fn port() -> u16 {
+fn get_port() -> u16 {
   std::env::var("PORT")
-    .map(|port_str| port_str.parse::<u16>().expect("PORT must be a valid u16"))
+    .map(|port_str| {
+      port_str.parse::<u16>().unwrap_or_else(|_| {
+        panic!("PORT must be a valid u16, got: {}", port_str)
+      })
+    })
     .unwrap_or(8000_u16)
 }
 
-fn addr() -> SocketAddr {
+fn get_address() -> SocketAddr {
   #[cfg(debug_assertions)]
   {
-    SocketAddr::from(([127, 0, 0, 1], port()))
+    SocketAddr::from(([127, 0, 0, 1], get_port()))
   }
   #[cfg(not(debug_assertions))]
   {
-    SocketAddr::from(([0, 0, 0, 0], port()))
+    SocketAddr::from(([0, 0, 0, 0], get_port()))
   }
 }
 
-async fn listener() -> TcpListener {
-  TcpListener::bind(&addr()).await.unwrap()
+async fn create_listener() -> Result<TcpListener, std::io::Error> {
+  let addr = get_address();
+  debug!("Attempting to bind to address: http://{}", addr);
+  TcpListener::bind(&addr).await
 }
 
-fn tracing() {
+fn setup_tracing() {
   #[cfg(debug_assertions)]
   {
     let env_filter =
       EnvFilter::try_from_default_env().unwrap_or_else(|_| "debug".into());
+
     tracing_subscriber::registry()
       .with(env_filter)
       .with(fmt::layer())
       .init();
   }
-
-  debug!("debug logging initialized");
 
   #[cfg(not(debug_assertions))]
   {
     let env_filter =
       EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into());
+
     tracing_subscriber::registry()
       .with(env_filter)
       .with(fmt::layer())
@@ -99,18 +62,30 @@ fn tracing() {
   }
 }
 
-async fn server() {
-  tracing();
-  let server = tokio::spawn(async move {
-    axum::serve(listener().await, router().into_make_service())
-      .await
-      .unwrap();
-  });
-  info!("Server running on http://{}", addr());
-  server.await.unwrap();
+async fn start_server() -> Result<(), Box<dyn std::error::Error>> {
+  let listener = match create_listener().await {
+    Ok(listener) => listener,
+    Err(err) => {
+      error!("Failed to bind to address: {}", err);
+      return Err(Box::new(err));
+    }
+  };
+
+  let router = create_router();
+
+  let addr = listener.local_addr()?;
+
+  info!("Server running on http://{}", addr);
+
+  axum::serve(listener, router.into_make_service()).await?;
+
+  Ok(())
 }
 
 #[tokio::main]
 async fn main() {
-  server().await;
+  setup_tracing();
+  if let Err(err) = start_server().await {
+    error!("Server encountered an error: {}", err);
+  }
 }
