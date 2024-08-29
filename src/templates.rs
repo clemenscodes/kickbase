@@ -1,11 +1,9 @@
+use std::collections::HashMap;
+
 use crate::constants::KICKBASE_API_ENDPOINT;
 use crate::html::HtmlTemplate;
 use askama::Template;
-use axum::{
-  extract::{Json, Request},
-  http::HeaderValue,
-  response::IntoResponse,
-};
+use axum::{extract::Json, response::IntoResponse};
 use serde::Deserialize;
 use tracing::debug;
 
@@ -26,8 +24,7 @@ pub async fn home() -> impl IntoResponse {
 #[template(path = "pages/login/get.html")]
 pub struct GetLogin;
 
-pub async fn get_login(request: Request) -> impl IntoResponse {
-  debug!("request: {request:#?}");
+pub async fn get_login() -> impl IntoResponse {
   let template = GetLogin {};
   HtmlTemplate(template)
 }
@@ -47,15 +44,28 @@ pub struct PostLoginPayload {
 pub async fn post_login(
   Json(payload): Json<PostLoginPayload>,
 ) -> impl IntoResponse {
-  let email = payload.email;
-  let password = payload.password;
-  debug!("email: {email:#?}");
-  debug!("password: {password:#?}");
+  let mut map = HashMap::new();
+
+  map.insert("email", payload.email);
+  map.insert("password", payload.password);
+
+  let client = reqwest::Client::new();
+
+  let res = client
+    .post(format!("{KICKBASE_API_ENDPOINT}/user/login"))
+    .json(&map)
+    .send()
+    .await
+    .unwrap()
+    .text()
+    .await
+    .unwrap();
+
+  debug!("{res:#?}");
+
   let template = PostLogin {
-    message: format!("Entered email: {email}"),
+    message: String::from("Logged in"),
   };
-  (
-    // [("HX-Location", HeaderValue::from_static("/dashboard"))],
-    HtmlTemplate(template),
-  )
+
+  HtmlTemplate(template)
 }
