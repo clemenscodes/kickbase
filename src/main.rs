@@ -72,7 +72,7 @@ fn tracing() {
   #[cfg(debug_assertions)]
   {
     let env_filter = EnvFilter::try_from_default_env()
-      .unwrap_or_else(|_| "kickbase=debug".into());
+      .unwrap_or_else(|_| "warn,info,kickbase=debug".into());
     tracing_subscriber::registry()
       .with(env_filter)
       .with(fmt::layer())
@@ -83,8 +83,8 @@ fn tracing() {
 
   #[cfg(not(debug_assertions))]
   {
-    let env_filter = EnvFilter::try_from_default_env()
-      .unwrap_or_else(|_| "kickbase=info".into());
+    let env_filter =
+      EnvFilter::try_from_default_env().unwrap_or_else(|_| "warn".into());
     tracing_subscriber::registry()
       .with(env_filter)
       .with(fmt::layer())
