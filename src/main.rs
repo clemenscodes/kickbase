@@ -8,8 +8,10 @@ use axum::{
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
-use tracing::debug;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tracing::{debug, info};
+use tracing_subscriber::{
+  fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter,
+};
 
 const KICKBASE_API_ENDPOINT: &str = "https://api.kickbase.com";
 
@@ -67,17 +69,33 @@ async fn listener() -> TcpListener {
 }
 
 fn tracing() {
-  let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
-    .unwrap_or_else(|_| "kickbase=debug".into());
-  tracing_subscriber::registry()
-    .with(env_filter)
-    .with(tracing_subscriber::fmt::layer())
-    .init();
+  #[cfg(debug_assertions)]
+  {
+    let env_filter = EnvFilter::try_from_default_env()
+      .unwrap_or_else(|_| "kickbase=debug".into());
+    tracing_subscriber::registry()
+      .with(env_filter)
+      .with(fmt::layer())
+      .init();
+  }
+
+  debug!("debug logging initialized");
+
+  #[cfg(not(debug_assertions))]
+  {
+    let env_filter = EnvFilter::try_from_default_env()
+      .unwrap_or_else(|_| "kickbase=info".into());
+    tracing_subscriber::registry()
+      .with(env_filter)
+      .with(fmt::layer())
+      .init();
+  }
+
+  info!("info logging initialized");
 }
 
 async fn server() {
   tracing();
-  debug!("This is a log message at the INFO level");
   axum::serve(listener().await, router().into_make_service())
     .await
     .unwrap();
