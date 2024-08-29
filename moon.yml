@@ -156,7 +156,6 @@ tasks:
       outputStyle: "stream"
       cache: false
       shell: true
-      windowsShell: "pwsh"
     env:
       MOON: '$projectRoot'
 
