@@ -6,19 +6,21 @@ mod templates;
 use router::create_router;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
 use tracing_subscriber::{
   fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter,
 };
 
 fn get_port() -> u16 {
+  let port: u16 = 8000;
   std::env::var("PORT")
     .map(|port_str| {
       port_str.parse::<u16>().unwrap_or_else(|_| {
-        panic!("PORT must be a valid u16, got: {}", port_str)
+        warn!("PORT must be a valid u16, got: {}", port_str);
+        port
       })
     })
-    .unwrap_or(8000_u16)
+    .unwrap_or(port)
 }
 
 fn get_address() -> SocketAddr {
