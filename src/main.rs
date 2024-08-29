@@ -61,7 +61,14 @@ fn port() -> u16 {
 }
 
 fn addr() -> SocketAddr {
-  SocketAddr::from(([0, 0, 0, 0], port()))
+  #[cfg(debug_assertions)]
+  {
+    SocketAddr::from(([127, 0, 0, 1], port()))
+  }
+  #[cfg(not(debug_assertions))]
+  {
+    SocketAddr::from(([0, 0, 0, 0], port()))
+  }
 }
 
 async fn listener() -> TcpListener {
@@ -71,8 +78,8 @@ async fn listener() -> TcpListener {
 fn tracing() {
   #[cfg(debug_assertions)]
   {
-    let env_filter = EnvFilter::try_from_default_env()
-      .unwrap_or_else(|_| "warn,info,kickbase=debug".into());
+    let env_filter =
+      EnvFilter::try_from_default_env().unwrap_or_else(|_| "debug".into());
     tracing_subscriber::registry()
       .with(env_filter)
       .with(fmt::layer())
@@ -84,21 +91,23 @@ fn tracing() {
   #[cfg(not(debug_assertions))]
   {
     let env_filter =
-      EnvFilter::try_from_default_env().unwrap_or_else(|_| "warn".into());
+      EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into());
     tracing_subscriber::registry()
       .with(env_filter)
       .with(fmt::layer())
       .init();
   }
-
-  info!("info logging initialized");
 }
 
 async fn server() {
   tracing();
-  axum::serve(listener().await, router().into_make_service())
-    .await
-    .unwrap();
+  let server = tokio::spawn(async move {
+    axum::serve(listener().await, router().into_make_service())
+      .await
+      .unwrap();
+  });
+  info!("Server running on http://{}", addr());
+  server.await.unwrap();
 }
 
 #[tokio::main]
