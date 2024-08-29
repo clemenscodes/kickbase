@@ -15,6 +15,7 @@ pub fn create_router() -> Router {
   if let Some(assets_str) = assets_path.to_str() {
     Router::new()
       .route("/", get(home))
+      .route("/login", get(get_login).post(post_login))
       .nest_service("/assets", ServeDir::new(assets_str))
   } else {
     error!("Failed to convert assets path to string.");
