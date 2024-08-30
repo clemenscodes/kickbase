@@ -1,30 +1,23 @@
-use crate::router;
-use std::{net::SocketAddr, sync::LazyLock};
+mod address;
+mod constants;
+mod html;
+mod port;
+mod router;
+mod templates;
+
+use crate::http::HttpClient;
+use address::get_address;
+use constants::KICKBASE_API_ENDPOINT;
+use std::sync::{Arc, LazyLock};
 use tokio::net::TcpListener;
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info};
 
-static PORT: LazyLock<u16> = LazyLock::new(|| {
-  let port: u16 = 8000;
-  std::env::var("PORT")
-    .map(|port_str| {
-      port_str.parse::<u16>().unwrap_or_else(|_| {
-        warn!("PORT must be a valid u16, got: {}", port_str);
-        port
-      })
-    })
-    .unwrap_or(port)
-});
-
-fn get_address() -> SocketAddr {
-  #[cfg(debug_assertions)]
-  {
-    SocketAddr::from(([127, 0, 0, 1], *PORT))
-  }
-  #[cfg(not(debug_assertions))]
-  {
-    SocketAddr::from(([0, 0, 0, 0], *PORT))
-  }
-}
+pub static KICKBASE_HTTP_CLIENT: LazyLock<Arc<HttpClient>> =
+  LazyLock::new(|| {
+    let client = HttpClient::new(KICKBASE_API_ENDPOINT)
+      .expect("Failed to create HttpClient");
+    Arc::new(client)
+  });
 
 pub async fn start_server() -> Result<(), Box<dyn std::error::Error>> {
   let addr = get_address();

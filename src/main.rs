@@ -1,10 +1,5 @@
-mod constants;
-mod html;
 mod http;
-mod router;
-mod routes;
 mod server;
-mod templates;
 mod trace;
 
 #[tokio::main]

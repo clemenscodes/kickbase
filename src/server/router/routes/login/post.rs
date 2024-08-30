@@ -1,25 +1,10 @@
-use crate::{
-  constants::KICKBASE_API_ENDPOINT,
-  html::HtmlTemplate,
-  http::HTTP_CLIENT,
-  templates::{GetLogin, Home, PostLogin},
+use crate::server::{
+  html::HtmlTemplate, templates::login::PostLogin, KICKBASE_HTTP_CLIENT,
 };
 use askama_axum::IntoResponse;
 use axum::Json;
 use serde::Deserialize;
 use std::collections::HashMap;
-
-pub async fn home() -> impl IntoResponse {
-  let template = Home {
-    api: KICKBASE_API_ENDPOINT,
-  };
-  HtmlTemplate(template)
-}
-
-pub async fn get_login() -> impl IntoResponse {
-  let template = GetLogin {};
-  HtmlTemplate(template)
-}
 
 #[derive(Deserialize, Debug)]
 pub struct PostLoginPayload {
@@ -35,7 +20,10 @@ pub async fn post_login(
   map.insert("email", payload.email);
   map.insert("password", payload.password);
 
-  HTTP_CLIENT.post("/user/login", &map).await.unwrap();
+  KICKBASE_HTTP_CLIENT
+    .post("/user/login", &map)
+    .await
+    .unwrap();
 
   let template = PostLogin {
     message: String::from("Logged in"),

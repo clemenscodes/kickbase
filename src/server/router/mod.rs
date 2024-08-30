@@ -1,4 +1,9 @@
-use crate::routes::{get_login, home, post_login};
+mod routes;
+
+use routes::{
+  home::home,
+  login::{get::get_login, post::post_login},
+};
 use axum::{routing::get, Router};
 use tower_http::services::ServeDir;
 

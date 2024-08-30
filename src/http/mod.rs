@@ -1,18 +1,8 @@
-use crate::constants::KICKBASE_API_ENDPOINT;
 use reqwest::{Client, Response, Url};
 use serde::Serialize;
-use std::sync::{Arc, LazyLock};
+use std::sync::Arc;
 use thiserror::Error;
 use tracing::debug;
-
-#[derive(Error, Debug)]
-pub enum HttpClientError {
-  #[error("HTTP client error: {0}")]
-  ReqwestError(#[from] reqwest::Error),
-
-  #[error("URL parsing error: {0}")]
-  UrlParseError(#[from] url::ParseError),
-}
 
 #[derive(Debug)]
 pub struct HttpClient {
@@ -63,8 +53,11 @@ impl HttpClient {
   // }
 }
 
-pub static HTTP_CLIENT: LazyLock<Arc<HttpClient>> = LazyLock::new(|| {
-  let client = HttpClient::new(KICKBASE_API_ENDPOINT)
-    .expect("Failed to create HttpClient");
-  Arc::new(client)
-});
+#[derive(Error, Debug)]
+pub enum HttpClientError {
+  #[error("HTTP client error: {0}")]
+  ReqwestError(#[from] reqwest::Error),
+
+  #[error("URL parsing error: {0}")]
+  UrlParseError(#[from] url::ParseError),
+}
