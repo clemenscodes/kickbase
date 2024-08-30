@@ -13,4 +13,3 @@ pub static PORT: LazyLock<u16> = LazyLock::new(|| {
     })
     .unwrap_or(port)
 });
-
