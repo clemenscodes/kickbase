@@ -14,8 +14,8 @@ tasks:
     command: "cargo watch -c -w src -w templates -w styles -- moon run start"
     local: true
   styles:
-    command: tailwindcss -i styles/tailwind.css -o assets/main.css
-    platform: "bun"
+    command: bunx tailwindcss -i styles/tailwind.css -o assets/main.css
+    platform: "system"
     inputs:
       - "@group(sources)"
       - "@group(configs)"

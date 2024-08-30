@@ -6,9 +6,6 @@
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
-    lpi = {
-      url = "github:cymenix/lpi";
-    };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs = {
@@ -17,14 +14,18 @@
         };
       };
     };
+    lpi = {
+      url = "github:cymenix/lpi";
+    };
   };
   outputs = {
     self,
     nixpkgs,
     flake-utils,
     rust-overlay,
+    lpi,
     ...
-  } @ inputs:
+  }:
     flake-utils.lib.eachDefaultSystem (
       system: let
         inherit (nixpkgs) lib;
@@ -39,8 +40,10 @@
           bash
           openssl
           pkg-config
-          moon
-          inputs.lpi.packages.${pkgs.system}.default
+          proto
+          bun
+          nix-output-monitor
+          lpi.packages.${pkgs.system}.default
         ];
         nativeBuildInputs = with pkgs; [
           rustToolchain
@@ -62,6 +65,9 @@
             RUST_BACKTRACE = 1;
             RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
             shellHook = ''
+              proto setup --no-modify-profile
+              proto use
+              moon setup
               moon sync projects
               moon sync hooks
               moon sync codeowners
