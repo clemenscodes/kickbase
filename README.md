@@ -8,4 +8,7 @@
 
 ```sh
 proto setup
+proto use
+moon setup
+moon run dev
 ```
