@@ -9,5 +9,3 @@
 ```sh
 proto setup
 ```
-
-##

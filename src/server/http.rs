@@ -1,8 +1,9 @@
 use super::constants::KICKBASE;
 use crate::http::HttpClient;
-use std::sync::{Arc, LazyLock};
+use std::sync::LazyLock;
+use tokio::sync::RwLock;
 
-pub static HTTP: LazyLock<Arc<HttpClient>> = LazyLock::new(|| {
+pub static HTTP: LazyLock<RwLock<HttpClient>> = LazyLock::new(|| {
   let client = HttpClient::new(KICKBASE).unwrap();
-  Arc::new(client)
+  RwLock::new(client)
 });
