@@ -11,28 +11,14 @@ language: "rust"
 platform: "rust"
 tasks:
   dev:
+    command: "cargo watch -c -w src -w templates -w styles -- moon run start"
     local: true
-    deps:
-      - "watch-styles"
-    command: "cargo watch -x 'run' -x 'test' -x 'lint'"
-    options:
-      cache: false
-    outputs:
-      - "target/"
   styles:
     command: tailwindcss -i styles/tailwind.css -o assets/main.css
     platform: "bun"
     inputs:
       - "@group(sources)"
       - "@group(configs)"
-    outputs:
-      - "assets/main.css"
-  watch-styles:
-    local: true
-    command: tailwindcss -i styles/tailwind.css -o assets/main.css --watch
-    platform: "bun"
-    options:
-      cache: false
     outputs:
       - "assets/main.css"
   build:
@@ -44,6 +30,11 @@ tasks:
       - "@group(configs)"
     outputs:
       - "target/"
+  start:
+    local: true
+    command: cargo run
+    deps:
+      - "styles"
   release:
     command: cargo build --release
     deps:
