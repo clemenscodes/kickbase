@@ -1,15 +1,11 @@
 mod routes;
 
-use routes::{
-  home::home,
-  login::{get::get_login, post::post_login},
-};
-use axum::{routing::get, Router};
-use tower_http::services::ServeDir;
+use axum::Router;
+use routes::{assets, home, login};
 
-pub fn create_router(assets: &str) -> Router {
+pub fn create_router() -> Router {
   Router::new()
-    .route("/", get(home))
-    .route("/login", get(get_login).post(post_login))
-    .nest_service("/assets", ServeDir::new(assets))
+    .merge(home::router())
+    .merge(login::router())
+    .merge(assets::router())
 }
