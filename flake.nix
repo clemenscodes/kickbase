@@ -40,7 +40,6 @@
           openssl
           pkg-config
           moon
-          biome
           inputs.lpi.packages.${pkgs.system}.default
         ];
         nativeBuildInputs = with pkgs; [

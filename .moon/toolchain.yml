@@ -1,2 +1,10 @@
 # https://moonrepo.dev/docs/config/toolchain
 $schema: 'https://moonrepo.dev/schemas/toolchain.json'
+rust:
+  version: '1.80.1'
+  syncToolchainConfig: true
+  bins:
+    - bin: 'cargo-nextest'
+      local: true
+    - bin: 'cargo-watch'
+      local: true

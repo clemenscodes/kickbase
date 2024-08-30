@@ -7,155 +7,74 @@ project:
 tags:
   - "kickbase"
 type: "application"
+language: "rust"
+platform: "rust"
 tasks:
-  build:
-    command: "make build"
-    platform: "system"
+  dev:
+    local: true
+    deps:
+      - "watch-styles"
+    command: "cargo watch -x 'run' -x 'test' -x 'lint'"
     options:
       cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
+    outputs:
+      - "target/"
+  styles:
+    command: tailwindcss -i styles/tailwind.css -o assets/main.css
+    platform: "bun"
     inputs:
-      - "src/**/*"
+      - "@group(sources)"
+      - "@group(configs)"
+    outputs:
+      - "assets/main.css"
+  watch-styles:
+    local: true
+    command: tailwindcss -i styles/tailwind.css -o assets/main.css --watch
+    platform: "bun"
+    options:
+      cache: false
+    outputs:
+      - "assets/main.css"
+  build:
+    command: cargo build
+    deps:
+      - "styles"
+    inputs:
+      - "@group(sources)"
+      - "@group(configs)"
     outputs:
       - "target/"
   release:
-    command: "make release"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
+    command: cargo build --release
+    deps:
+      - "styles"
     inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
+      - "@group(sources)"
+      - "@group(configs)"
     outputs:
       - "target/"
-  run:
-    command: "make run"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
-    inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
-  run-release:
-    command: "make run-release"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
-    inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
   test:
-    command: "make test"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
+    command: cargo test
     inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
-  test-all:
-    command: "make test-all"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
+      - "@group(sources)"
+      - "@group(configs)"
+    outputs:
+      - "target/"
+  format:
+    command: cargo fmt
     inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
-  fmt:
-    command: "make fmt"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
-    inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
+      - "@group(sources)"
+      - "@group(configs)"
   lint:
-    command: "make lint"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
+    command: cargo clippy
     inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
-  doc:
-    command: "make doc"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
-    inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
-  install:
-    command: "make install"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
-    inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
-  uninstall:
-    command: "make uninstall"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
-    inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
-  dist-clean:
-    command: "make dist-clean"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
-    inputs:
-      - "src/**/*"
-      - "assets/**/*"
-      - "templates/**/*"
-  help:
-    command: "make help"
-    platform: "system"
-    options:
-      cache: false
-      outputStyle: "stream"
-      windowsShell: "pwsh"
+      - "@group(sources)"
+      - "@group(configs)"
   lpi:
     command: "lpi"
     platform: "system"
     options:
-      outputStyle: "stream"
       cache: false
-      shell: true
+      runFromWorkspaceRoot: true
     env:
-      MOON: '$projectRoot'
-
+      MOON: "$workspaceRoot"
