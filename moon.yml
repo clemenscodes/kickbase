@@ -38,6 +38,8 @@ tasks:
   prod:
     local: true
     command: target/release/kickbase
+    options:
+      outputStyle: 'buffer'
   release:
     command: cargo build --release
     deps:

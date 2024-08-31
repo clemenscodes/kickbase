@@ -10,7 +10,6 @@ ENV SHELL=/bin/bash
 #Update the package list and install curl and proto dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    bash=5.1-2* \
     git=1:2.30.2-1* \
     gzip=1.10-4* \
     unzip=6.0-26* \
