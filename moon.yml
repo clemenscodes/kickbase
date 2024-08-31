@@ -37,9 +37,7 @@ tasks:
       - "styles"
   prod:
     local: true
-    command: cargo run --release
-    deps:
-      - "styles"
+    command: target/release/kickbase
   release:
     command: cargo build --release
     deps:
