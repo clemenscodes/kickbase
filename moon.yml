@@ -35,6 +35,11 @@ tasks:
     command: cargo run
     deps:
       - "styles"
+  prod:
+    local: true
+    command: cargo run --release
+    deps:
+      - "styles"
   release:
     command: cargo build --release
     deps:
