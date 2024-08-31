@@ -3,9 +3,9 @@ $schema: "https://moonrepo.dev/schemas/tasks.json"
 implicitInputs:
   - "/flake.lock"
   - "/flake.nix"
-  - "/package.json"
-  - "/bun.lockb"
+  - "/default.nix"
   - "/Cargo.lock"
+  - "/Cargo.toml"
 
 fileGroups:
   configs:
