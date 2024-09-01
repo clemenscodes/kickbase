@@ -100,13 +100,15 @@ FROM alpine:3.20.2 AS start
 WORKDIR /app
 
 # Copy built sources
-COPY --from=build /app/kickbase /app/kickbase
+COPY --from=build /app/kickbase /usr/local/bin/kickbase
 COPY --from=build /app/assets /app/assets
+
+ENV KICKBASE_ASSETS=/app/assets
 
 # Run as dedicated user account
 RUN addgroup -g 1000 kickbase && \
   adduser -D -s /bin/sh -u 1000 -G kickbase kickbase && \
-  chown kickbase:kickbase kickbase
+  chown kickbase:kickbase /usr/local/bin/kickbase
 
 USER kickbase
 

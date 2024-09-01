@@ -35,19 +35,15 @@
           (pkgsBuildHost.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml).override {
             extensions = ["rust-src" "clippy" "llvm-tools"];
           };
-        buildInputs = with pkgs; [
-          coreutils
-          bash
-          openssl
-          pkg-config
-          proto
-          bun
-          nix-output-monitor
-          lpi.packages.${pkgs.system}.default
-        ];
+        buildInputs = with pkgs; [pkg-config];
         nativeBuildInputs = with pkgs; [
           rustToolchain
           rust-analyzer
+          openssl
+          bun
+          proto
+          nix-output-monitor
+          lpi.packages.${pkgs.system}.default
         ];
       in {
         packages = {
