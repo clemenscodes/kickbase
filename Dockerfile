@@ -77,7 +77,7 @@ RUN rm .moon/toolchain.yml && \
   echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs && \
   rustup target add x86_64-unknown-linux-musl && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
-  rm -rf src
+  rm -rf target/x86_64-unknown-linux-musl/release/deps/kickbase*
 
 COPY tailwind.config.js tailwind.config.js
 COPY moon.yml moon.yml
@@ -100,7 +100,8 @@ FROM alpine:3.20.2 AS start
 WORKDIR /app
 
 # Copy built sources
-COPY --from=build /app .
+COPY --from=build /app/kickbase /app/kickbase
+COPY --from=build /app/assets /app/assets
 
 # Run as dedicated user account
 RUN addgroup -g 1000 kickbase && \
