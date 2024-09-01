@@ -71,5 +71,4 @@ FROM base AS start
 COPY --from=build /root/.proto /root/.proto
 COPY --from=build /app /app
 
-CMD ["moon", "run",  "kickbase:prod"]
-
+CMD ["/target/release/kickbase"]
