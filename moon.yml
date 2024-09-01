@@ -9,6 +9,17 @@ tags:
 type: "application"
 language: "rust"
 platform: "rust"
+docker:
+  file:
+    buildTask: "build"
+    image: rust:1.80.1-slim-bullseye
+    startTask: "target/release/kickbase"
+  scaffold:
+    include:
+      - 'templates/**/*'
+      - 'assets/**/*'
+      - 'styles/**/*'
+      - 'tailwind.config.js'
 tasks:
   dev:
     command: "cargo watch -c -w src -w templates -w styles -- moon run start"
@@ -39,7 +50,7 @@ tasks:
     local: true
     command: target/release/kickbase
     options:
-      outputStyle: 'buffer'
+      outputStyle: "buffer"
   release:
     command: cargo build --release
     deps:
@@ -49,6 +60,10 @@ tasks:
       - "@group(configs)"
     outputs:
       - "target/"
+  install:
+    command: cargo install --path .
+    deps:
+      - "styles"
   test:
     command: cargo test
     inputs:

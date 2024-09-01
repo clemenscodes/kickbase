@@ -1,4 +1,2 @@
 .moon/cache
-node_modules
-Dockerfile
-.dockerignore
+.git

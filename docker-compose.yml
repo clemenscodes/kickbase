@@ -1,15 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: ["moon", "run", "kickbase:prod"]
-    environment:
-      - DEBIAN_FRONTEND=noninteractive
-      - SHELL=/bin/bash
-      - PATH=/root/.proto/bin:$PATH
-      - PORT=8000
-      - CI=true
+    build: .
     ports:
       - "8000:8000"
     restart: unless-stopped

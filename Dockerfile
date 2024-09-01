@@ -1,5 +1,5 @@
 #### BASE STAGE
-#### Installs moon.
+#### Installs proto.
 
 FROM rust:1.80.1-slim-bullseye AS base
 
@@ -30,18 +30,10 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://moonrepo.dev/install/proto.sh | bash -s -- 0.40.4 --yes
 
 ENV PATH="/root/.proto/bin:$PATH"
+ENV PATH="/root/.cargo/bin:$PATH"
 
 RUN proto plugin add moon "https://raw.githubusercontent.com/moonrepo/moon/master/proto-plugin.toml" && \
   proto install moon
-
-#### SKELETON STAGE
-#### Scaffolds repository skeleton structures.
-
-FROM base AS skeleton
-
-# Copy entire repository and scaffold
-COPY . .
-RUN moon docker scaffold kickbase
 
 #### BUILD STAGE
 #### Builds the project.
@@ -49,26 +41,41 @@ RUN moon docker scaffold kickbase
 FROM base AS build
 
 # Copy toolchain
-COPY --from=skeleton /root/.proto /root/.proto
+COPY Cargo.toml Cargo.toml
+COPY Cargo.lock Cargo.lock
+COPY .moon .moon
+COPY dockerManifest.json dockerManifest.json
 
-# Copy workspace configs
-COPY --from=skeleton /app/.moon/docker/workspace .
+# Build only dependencies
+RUN rm .moon/toolchain.yml && \
+  mv .moon/docker.toolchain.yml .moon/toolchain.yml && \
+  echo "id: kickbase" > moon.yml && \
+  echo "project:" >> moon.yml && \
+  echo "  name: kickbase" >> moon.yml && \
+  echo "  description: kickbase" >> moon.yml && \
+  moon docker setup && \
+  mkdir src/ && \
+  echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs && \
+  cargo build --release
 
-# Copy project sources
-COPY --from=skeleton /app/.moon/docker/sources .
+COPY tailwind.config.js tailwind.config.js
+COPY moon.yml moon.yml
+COPY styles styles
+COPY assets assets
+COPY templates templates
+COPY src src
 
-# Install dependencies
-RUN moon docker setup && \
-  moon run kickbase:release && \
-  moon docker prune
+# Build application
+RUN moon run kickbase:release && \
+  mv target/release/kickbase . && \
+  rm -rf target/release/deps/kickbase*
 
 #### START STAGE
 #### Runs the project.
 
-FROM base AS start
+FROM alpine:3.20.2 AS start
 
 # Copy built sources
-COPY --from=build /root/.proto /root/.proto
-COPY --from=build /app /app
+COPY --from=build /app/kickbase /usr/local/bin/kickbase
 
-CMD ["/target/release/kickbase"]
+CMD ["/usr/local/bin/kickbase"]
