@@ -25,7 +25,7 @@ tasks:
     command: "cargo watch -c -w src -w templates -w styles -- moon run start"
     local: true
   styles:
-    command: bunx tailwindcss -i styles/tailwind.css -o assets/main.css
+    command: "bunx tailwindcss -i styles/tailwind.css -o assets/main.css"
     platform: "system"
     inputs:
       - "@group(sources)"
@@ -33,7 +33,7 @@ tasks:
     outputs:
       - "assets/main.css"
   build:
-    command: cargo build
+    command: "cargo build"
     deps:
       - "styles"
     inputs:
@@ -43,16 +43,11 @@ tasks:
       - "target/"
   start:
     local: true
-    command: cargo run
+    command: "cargo run --release"
     deps:
       - "styles"
-  prod:
-    local: true
-    command: target/release/kickbase
-    options:
-      outputStyle: "buffer"
   release:
-    command: cargo build --release
+    command: "cargo build --release"
     deps:
       - "styles"
     inputs:
@@ -60,24 +55,20 @@ tasks:
       - "@group(configs)"
     outputs:
       - "target/"
-  install:
-    command: cargo install --path .
-    deps:
-      - "styles"
   test:
-    command: cargo test
+    command: "cargo test"
     inputs:
       - "@group(sources)"
       - "@group(configs)"
     outputs:
       - "target/"
   format:
-    command: cargo fmt
+    command: "cargo fmt"
     inputs:
       - "@group(sources)"
       - "@group(configs)"
   lint:
-    command: cargo clippy
+    command: "cargo clippy"
     inputs:
       - "@group(sources)"
       - "@group(configs)"

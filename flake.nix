@@ -40,8 +40,8 @@
           rustToolchain
           rust-analyzer
           openssl
-          bun
           proto
+          tailwindcss
           nix-output-monitor
           lpi.packages.${pkgs.system}.default
         ];
@@ -64,9 +64,6 @@
               proto setup --no-modify-profile
               proto use
               moon setup
-              moon sync projects
-              moon sync hooks
-              moon sync codeowners
               export MOON="$(pwd)"
             '';
           };
