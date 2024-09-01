@@ -6,11 +6,6 @@ mod trace;
 async fn main() {
   trace::setup_tracing();
 
-
-
-
-
-
   if let Err(err) = server::start_server().await {
     tracing::error!("Server encountered an error: {}", err);
   }
