@@ -6,33 +6,47 @@ FROM rust:1.80.1-slim-bullseye AS base
 # Set environment variable to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL=/bin/bash
+ENV PATH="/root/.proto/bin:$PATH"
 
 #Update the package list and install curl and proto dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    git=1:2.30.2-1* \
-    gzip=1.10-4* \
-    unzip=6.0-26* \
-    xz-utils=5.2.5-2.1* \
-    curl=7.74.0-1.3* \
-    pkg-config=0.29.2-1* \
-    openssl=1.1.1* \
-    libssl-dev=1.1.1* \
-    && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+  apt-get install -y --no-install-recommends \
+  git=1:2.30.2-1* \
+  gzip=1.10-4* \
+  unzip=6.0-26* \
+  xz-utils=5.2.5-2.1* \
+  curl=7.74.0-1.3* \
+  pkg-config=0.29.2-1* \
+  openssl=1.1.1* \
+  libssl-dev=1.1.1* \
+  musl-tools=1.2.2-1* \
+  make=4.3-4.1* \
+  && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
+
+WORKDIR /openssl
+
+RUN ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/x86_64-linux-musl/asm && \
+  ln -s /usr/include/asm-generic /usr/include/x86_64-linux-musl/asm-generic && \
+  ln -s /usr/include/linux /usr/include/x86_64-linux-musl/linux && \
+  mkdir /musl && \
+  curl -LO https://github.com/openssl/openssl/archive/OpenSSL_1_1_1f.tar.gz && \
+  tar zxvf OpenSSL_1_1_1f.tar.gz
+
+WORKDIR /openssl/openssl-OpenSSL_1_1_1f/
+
+RUN CC="musl-gcc -fPIE -pie" ./Configure no-shared no-async --prefix=/musl --openssldir=/musl/ssl linux-x86_64 && \
+  make depend && \
+  make -j"$(nproc)" && \
+  make install
 
 WORKDIR /app
 
-# Install proto binary
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN curl -fsSL https://moonrepo.dev/install/proto.sh | bash -s -- 0.40.4 --yes
-
-ENV PATH="/root/.proto/bin:$PATH"
-ENV PATH="/root/.cargo/bin:$PATH"
-
-RUN proto plugin add moon "https://raw.githubusercontent.com/moonrepo/moon/master/proto-plugin.toml" && \
+RUN curl -fsSL https://moonrepo.dev/install/proto.sh | bash -s -- 0.40.4 --yes && \
+  proto plugin add moon "https://raw.githubusercontent.com/moonrepo/moon/master/proto-plugin.toml" && \
   proto install moon
 
 #### BUILD STAGE
@@ -45,6 +59,11 @@ COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
 COPY .moon .moon
 COPY dockerManifest.json dockerManifest.json
+COPY --from=base /musl /musl
+
+ENV PKG_CONFIG_ALLOW_CROSS=1
+ENV OPENSSL_STATIC=true
+ENV OPENSSL_DIR=/musl
 
 # Build only dependencies
 RUN rm .moon/toolchain.yml && \
@@ -56,7 +75,9 @@ RUN rm .moon/toolchain.yml && \
   moon docker setup && \
   mkdir src/ && \
   echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs && \
-  cargo build --release
+  rustup target add x86_64-unknown-linux-musl && \
+  cargo build --release --target=x86_64-unknown-linux-musl && \
+  rm -rf src
 
 COPY tailwind.config.js tailwind.config.js
 COPY moon.yml moon.yml
@@ -66,16 +87,26 @@ COPY templates templates
 COPY src src
 
 # Build application
-RUN moon run kickbase:release && \
-  mv target/release/kickbase . && \
-  rm -rf target/release/deps/kickbase*
+RUN moon run kickbase:styles && \
+  cargo build --release --target=x86_64-unknown-linux-musl && \
+  mv target/x86_64-unknown-linux-musl/release/kickbase . && \
+  moon docker prune
 
 #### START STAGE
 #### Runs the project.
 
 FROM alpine:3.20.2 AS start
 
-# Copy built sources
-COPY --from=build /app/kickbase /usr/local/bin/kickbase
+WORKDIR /app
 
-CMD ["/usr/local/bin/kickbase"]
+# Copy built sources
+COPY --from=build /app .
+
+# Run as dedicated user account
+RUN addgroup -g 1000 kickbase && \
+  adduser -D -s /bin/sh -u 1000 -G kickbase kickbase && \
+  chown kickbase:kickbase kickbase
+
+USER kickbase
+
+CMD ["./kickbase"]

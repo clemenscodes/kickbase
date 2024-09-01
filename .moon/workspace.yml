@@ -1,7 +1,7 @@
 # https://moonrepo.dev/docs/config/workspace
 $schema: "https://moonrepo.dev/schemas/workspace.json"
 
-versionConstraint: ">=1.27.1"
+versionConstraint: ">=1.27.10"
 
 telemetry: false
 
@@ -44,4 +44,3 @@ runner:
   inheritColorsForPipedTasks: true
   logRunningCommand: true
   cacheLifetime: "24 hours"
-
