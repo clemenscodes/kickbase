@@ -1,7 +1,7 @@
 # https://moonrepo.dev/docs/config/workspace
 $schema: "https://moonrepo.dev/schemas/workspace.json"
 
-versionConstraint: ">=1.27.10"
+versionConstraint: ">=1.27.0"
 
 telemetry: false
 
