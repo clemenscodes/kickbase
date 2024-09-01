@@ -1,9 +1,13 @@
 # KICKBASE
 
-A web application that displays KICKBASE data which is not available using the app.
+A web application that displays [KICKBASE](https://kickbase.com)
+data which is not available using the app, by utilizing the [API](https://kevinskyba.github.io/kickbase-api-doc/index.html).
 
-Authentication is fully proxied to KICKBASE and
-no data is ever stored on the server, no telemetry is submitted.
+Authentication is fully proxied to [KICKBASE](https://kickbase.com)
+and no data is ever stored on the server, no telemetry is submitted.
+
+Please do not use this application to abuse the servers of KICKBASE
+and use it responsibly.
 
 ## Installation
 
