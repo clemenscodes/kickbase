@@ -25,6 +25,12 @@ RUN apt-get update && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN curl -fsSL https://moonrepo.dev/install/proto.sh | bash -s -- 0.40.4 --yes && \
+  proto plugin add moon "https://raw.githubusercontent.com/moonrepo/moon/master/proto-plugin.toml" && \
+  proto install moon
+
 WORKDIR /openssl
 
 RUN ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/x86_64-linux-musl/asm && \
@@ -42,12 +48,6 @@ RUN CC="musl-gcc -fPIE -pie" ./Configure no-shared no-async --prefix=/musl --ope
   make install
 
 WORKDIR /app
-
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-RUN curl -fsSL https://moonrepo.dev/install/proto.sh | bash -s -- 0.40.4 --yes && \
-  proto plugin add moon "https://raw.githubusercontent.com/moonrepo/moon/master/proto-plugin.toml" && \
-  proto install moon
 
 #### BUILD STAGE
 #### Builds the project.
