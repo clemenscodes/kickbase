@@ -41,7 +41,6 @@
           rust-analyzer
           openssl
           proto
-          tailwindcss
           nix-output-monitor
           lpi.packages.${pkgs.system}.default
         ];
@@ -64,6 +63,7 @@
               proto setup --no-modify-profile
               proto use
               moon setup
+              export PATH="$HOME/.moon/bin:/$HOME/.proto/bin:$PATH"
               export MOON="$(pwd)"
             '';
           };
