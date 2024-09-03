@@ -112,4 +112,4 @@ RUN addgroup -g 1000 kickbase && \
 
 USER kickbase
 
-CMD ["./kickbase"]
+CMD ["kickbase"]
