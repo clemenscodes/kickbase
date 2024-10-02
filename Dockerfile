@@ -1,5 +1,6 @@
 FROM rust:1.80.1-slim-bullseye AS base
 
+ENV APP=kickbase
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL=/bin/bash
 ENV PATH="/root/.proto/bin:$PATH"
@@ -56,16 +57,16 @@ ENV PKG_CONFIG_ALLOW_CROSS=1
 ENV OPENSSL_STATIC=true
 ENV OPENSSL_DIR=/musl
 
-RUN echo "id: webserver" > moon.yml && \
+RUN echo "id: ${APP}" > moon.yml && \
   echo "project:" >> moon.yml && \
-  echo "  name: webserver" >> moon.yml && \
-  echo "  description: webserver" >> moon.yml && \
+  echo "  name: ${APP}" >> moon.yml && \
+  echo "  description: ${APP}" >> moon.yml && \
   moon docker setup && \
   mkdir src/ && \
   echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs && \
   rustup target add x86_64-unknown-linux-musl && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
-  rm -rf target/x86_64-unknown-linux-musl/release/deps/webserver*
+  rm -rf target/x86_64-unknown-linux-musl/release/deps/${APP}*
 
 COPY tailwind.config.js tailwind.config.js
 COPY moon.yml moon.yml
@@ -74,24 +75,26 @@ COPY assets assets
 COPY templates templates
 COPY src src
 
-RUN moon run webserver:styles && \
+RUN moon run ${APP}:styles && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
-  mv target/x86_64-unknown-linux-musl/release/webserver . && \
+  mv target/x86_64-unknown-linux-musl/release/${APP} . && \
   moon docker prune
 
 FROM alpine:3.20.2 AS start
 
+ENV APP=kickbase
+
 WORKDIR /app
 
-COPY --from=build /app/webserver /usr/local/bin/webserver
+COPY --from=build /app/${APP} /usr/local/bin/${APP}
 COPY --from=build /app/assets /app/assets
 
-ENV webserver_ASSETS=/app/assets
+ENV WEBSERVER_ASSETS=/app/assets
 
-RUN addgroup -g 1000 webserver && \
-  adduser -D -s /bin/sh -u 1000 -G webserver webserver && \
-  chown webserver:webserver /usr/local/bin/webserver
+RUN addgroup -g 1000 ${APP} && \
+  adduser -D -s /bin/sh -u 1000 -G ${APP} ${APP} && \
+  chown ${APP}:${APP} /usr/local/bin/${APP}
 
-USER webserver
+USER ${APP}
 
-CMD ["webserver"]
+CMD ["kickbase"]

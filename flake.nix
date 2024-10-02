@@ -20,10 +20,9 @@
           manifest = (lib.importTOML ./Cargo.toml).package;
           filter = nix-filter.lib;
           pname = name;
-          craneLib = (crane.mkLib pkgs).overrideToolchain (p:
-            (p.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml).override {
-              extensions = ["rust-src" "clippy"];
-            });
+          craneLib = (crane.mkLib pkgs).overrideToolchain (
+            p: p.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml
+          );
           src = filter {
             root = ./.;
             include = [
@@ -64,11 +63,9 @@
               mv assets $out/assets
             '';
           };
-          app = flake-utils.lib.mkApp {
-            drv = pkgs.writeShellScriptBin pname ''
-              WEBSERVER_ASSETS=${assets}/assets ${crate}/bin/${pname}
-            '';
-          };
+          app = pkgs.writeShellScriptBin pname ''
+            WEBSERVER_ASSETS=${assets}/assets ${crate}/bin/${pname}
+          '';
         in
           with pkgs; {
             checks = {
@@ -79,7 +76,9 @@
               default = app;
             };
             apps = {
-              default = app;
+              default = flake-utils.lib.mkApp {
+                drv = app;
+              };
             };
             devShells = {
               default = craneLib.devShell {
@@ -94,15 +93,13 @@
                   tailwindcss
                   bun
                 ];
-                PORT = 8000;
-                RUST_SRC_PATH = "${rust.packages.stable.rustPlatform.rustLibSrc}";
+                RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
                 RUST_BACKTRACE = 1;
               };
             };
             formatter = alejandra;
           }
       );
-
   nixConfig = {
     extra-substituters = [
       "https://nix-community.cachix.org"
