@@ -26,10 +26,10 @@ jobs:
           name: ${{ env.NIX_CACHE }}
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Check flake
-        run: nix flake check
+        run: nix flake check --accept-flake-config
       - name: Cache flake inputs
         run: |
-          nix flake archive --json \
+          nix flake archive --json --accept-flake-config \
             | jq -r '.path,(.inputs|to_entries[].value.path)' \
             | cachix push ${{ env.NIX_CACHE }}
       - name: Cache development shell
