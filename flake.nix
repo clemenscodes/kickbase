@@ -64,9 +64,11 @@
               mv assets $out/assets
             '';
           };
-          app = pkgs.writeShellScriptBin pname ''
-            WEBSERVER_ASSETS=${assets}/assets ${crate}/bin/${pname}
-          '';
+          app = flake-utils.lib.mkApp {
+            drv = pkgs.writeShellScriptBin pname ''
+              WEBSERVER_ASSETS=${assets}/assets ${crate}/bin/${pname}
+            '';
+          };
         in
           with pkgs; {
             checks = {
@@ -77,9 +79,7 @@
               default = app;
             };
             apps = {
-              default = flake-utils.lib.mkApp {
-                drv = app;
-              };
+              default = app;
             };
             devShells = {
               default = craneLib.devShell {
