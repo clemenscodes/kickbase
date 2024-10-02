@@ -11,7 +11,7 @@ concurrency:
 
 env:
   NIX_CACHE: clemenscodes
-  NIX_DEV_PROFILE: webserver-dev-profile
+  NIX_DEV_PROFILE: kickbase-dev-profile
 
 jobs:
   cachix:
@@ -25,9 +25,11 @@ jobs:
         with:
           name: ${{ env.NIX_CACHE }}
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - name: Check flake
+        run: nix flake check --accept-flake-config
       - name: Cache flake inputs
         run: |
-          nix flake archive --json \
+          nix flake archive --json --accept-flake-config \
             | jq -r '.path,(.inputs|to_entries[].value.path)' \
             | cachix push ${{ env.NIX_CACHE }}
       - name: Cache development shell
@@ -39,4 +41,3 @@ jobs:
           nix build --accept-flake-config --json \
             | jq -r '.[].outputs | to_entries[].value' \
             | cachix push ${{ env.NIX_CACHE }}
-

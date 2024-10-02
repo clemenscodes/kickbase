@@ -20,10 +20,9 @@
           manifest = (lib.importTOML ./Cargo.toml).package;
           filter = nix-filter.lib;
           pname = name;
-          craneLib = (crane.mkLib pkgs).overrideToolchain (p:
-            (p.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml).override {
-              extensions = ["rust-src" "clippy"];
-            });
+          craneLib = (crane.mkLib pkgs).overrideToolchain (
+            p: p.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml
+          );
           src = filter {
             root = ./.;
             include = [
@@ -94,15 +93,13 @@
                   tailwindcss
                   bun
                 ];
-                PORT = 8000;
-                RUST_SRC_PATH = "${rust.packages.stable.rustPlatform.rustLibSrc}";
+                RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
                 RUST_BACKTRACE = 1;
               };
             };
             formatter = alejandra;
           }
       );
-
   nixConfig = {
     extra-substituters = [
       "https://nix-community.cachix.org"
