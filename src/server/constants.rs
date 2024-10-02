@@ -1,1 +1,1 @@
-pub const KICKBASE: &str = "https://api.kickbase.com";
+pub const API: &str = "https://api.kickbase.com";

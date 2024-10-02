@@ -1,11 +1,11 @@
 # https://moonrepo.dev/docs/config/project
 $schema: "https://moonrepo.dev/schemas/project.json"
-id: "kickbase"
+id: "webserver"
 project:
-  name: "kickbase"
-  description: "kickbase"
+  name: "webserver"
+  description: "webserver"
 tags:
-  - "kickbase"
+  - "webserver"
 type: "application"
 language: "rust"
 platform: "rust"
@@ -13,7 +13,7 @@ docker:
   file:
     buildTask: "build"
     image: rust:1.80.1-slim-bullseye
-    startTask: "target/release/kickbase"
+    startTask: "target/release/webserver"
   scaffold:
     include:
       - 'templates/**/*'
@@ -23,7 +23,6 @@ docker:
 tasks:
   dev:
     command: "cargo watch -c -w src -w templates -w styles -- moon run start"
-    local: true
   styles:
     command: "bunx tailwindcss -i styles/tailwind.css -o assets/main.css"
     platform: "system"

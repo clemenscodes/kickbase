@@ -1,13 +1,7 @@
-# KICKBASE
+# Example Web Server
 
-A web application that displays [KICKBASE](https://kickbase.com)
-data which is not available using the app, by utilizing the [API](https://kevinskyba.github.io/kickbase-api-doc/index.html).
-
-Authentication is fully proxied to [KICKBASE](https://kickbase.com)
-and no data is ever stored on the server, no telemetry is submitted.
-
-Please do not use this application to abuse the servers of KICKBASE
-and use it responsibly.
+This is a simple stateless webserver that fetches some data and returns
+HTML to the client.
 
 ## Installation
 
@@ -17,7 +11,7 @@ For unix systems, the recommended way is to use [nix](https://nixos.org/download
 ### Using [nix](https://nixos.org/download/#download-nix)
 
 ```sh
-nix run github:clemenscodes/kickbase
+nix run github:clemenscodes/example-webserver
 ```
 
 On Windows, using nix in [WSL2](https://learn.microsoft.com/de-de/windows/wsl/about#what-is-wsl-2)
@@ -28,8 +22,8 @@ Alternatively, use either [proto](https://moonrepo.dev/docs/proto) or [docker](h
 First clone this repository using [git](https://git-scm.com/).
 
 ```sh
-git clone https://clemenscodes/kickbase.git
-cd kickbase
+git clone https://clemenscodes/example-webserver.git
+cd webserver
 ```
 
 ### Using [proto](https://moonrepo.dev/docs/proto/install)
