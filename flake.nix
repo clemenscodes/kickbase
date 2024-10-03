@@ -2,6 +2,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
+    services-flake.url = "github:juspay/services-flake";
     crane.url = "github:ipetkov/crane";
     fenix = {
       url = "github:nix-community/fenix";
@@ -13,15 +15,16 @@
     };
     nix-filter.url = "github:numtide/nix-filter";
   };
-
   outputs = inputs:
     with inputs;
       flake-parts.lib.mkFlake {inherit inputs;} {
+        imports = [
+          process-compose-flake.flakeModule
+        ];
         systems = [
           "x86_64-linux"
           "aarch64-linux"
         ];
-
         perSystem = {
           pkgs,
           system,
@@ -112,7 +115,9 @@
             };
         in
           with pkgs; {
+            formatter = alejandra;
             checks = {
+              inherit assets;
               inherit (linux) linux-crate linux-clippy linux-coverage;
               inherit (windows) windows-crate windows-clippy windows-coverage;
             };
@@ -120,11 +125,11 @@
               inherit assets;
               inherit (linux) linux-crate linux-clippy linux-coverage;
               inherit (windows) windows-crate windows-clippy windows-coverage;
-              default = linux.linux-app;
+              default = self.packages.${system}.kickbase;
             };
             apps = {
-              default = flake-utils.lib.mkApp {
-                drv = linux.linux-app;
+              default = {
+                program = self.packages.${system}.default;
               };
             };
             devShells = {
@@ -144,7 +149,20 @@
                 RUST_BACKTRACE = 1;
               };
             };
-            formatter = alejandra;
+            process-compose = {
+              kickbase = {
+                imports = [
+                  services-flake.processComposeModules.default
+                ];
+                settings = {
+                  processes = {
+                    server = {
+                      command = "${self.packages.${system}.linux-crate}/bin/kickbase";
+                    };
+                  };
+                };
+              };
+            };
           };
       };
 
