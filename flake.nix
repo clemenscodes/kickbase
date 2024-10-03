@@ -31,19 +31,19 @@
           ...
         }: let
           inherit (nixpkgs) lib;
-          inherit ((lib.importTOML ./Cargo.toml).package) name version;
+          inherit ((lib.importTOML ./crates/server/Cargo.toml).package) name version;
 
           pname = name;
 
           assets = pkgs.stdenv.mkDerivation {
             inherit version;
             src = nix-filter.lib {
-              root = ./.;
+              root = ./crates/server/.;
               include = [
-                ./assets
-                ./styles
-                ./templates
-                ./tailwind.config.js
+                "assets"
+                "styles"
+                "templates"
+                "tailwind.config.js"
               ];
             };
             pname = "${pname}-assets";
@@ -71,13 +71,13 @@
           args = {
             inherit pname version;
             src = nix-filter.lib {
-              root = ./.;
+              root = ./crates/server/.;
               include = [
-                ./src
-                ./styles
-                ./templates
-                ./Cargo.lock
-                ./Cargo.toml
+                "src"
+                "styles"
+                "templates"
+                "Cargo.toml"
+                "Cargo.lock"
               ];
             };
             strictDeps = true;

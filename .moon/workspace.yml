@@ -6,7 +6,7 @@ versionConstraint: ">=1.27.0"
 telemetry: false
 
 projects:
-  - "moon.yml"
+  - "**/*/moon.yml"
 
 vcs:
   manager: "git"
