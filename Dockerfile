@@ -78,7 +78,7 @@ COPY crates crates
 
 RUN moon run ${APP}/server:styles && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
-  mv target/x86_64-unknown-linux-musl/release/${APP} ${APP} &&
+  mv target/x86_64-unknown-linux-musl/release/${APP} ${APP}
 
 FROM alpine:3.20.2 AS start
 
