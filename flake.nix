@@ -3,49 +3,29 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     crane.url = "github:ipetkov/crane";
-    nix-filter.url = "github:numtide/nix-filter";
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-filter.url = "github:numtide/nix-filter";
   };
+
   outputs = inputs:
     with inputs;
       flake-utils.lib.eachDefaultSystem (
         system: let
           inherit (nixpkgs) lib;
-          inherit (manifest) name version;
-          overlays = [(import rust-overlay)];
-          pkgs = import nixpkgs {inherit system lib overlays;};
-          manifest = (lib.importTOML ./Cargo.toml).package;
-          filter = nix-filter.lib;
+          inherit ((lib.importTOML ./Cargo.toml).package) name version;
+
           pname = name;
-          craneLib = (crane.mkLib pkgs).overrideToolchain (
-            p: p.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml
-          );
-          src = filter {
-            root = ./.;
-            include = [
-              ./src
-              ./styles
-              ./templates
-              ./Cargo.lock
-              ./Cargo.toml
-            ];
-          };
-          args = {
-            inherit src;
-            strictDeps = true;
-            buildInputs = with pkgs; [openssl];
-            nativeBuildInputs = with pkgs; [pkg-config];
-          };
-          cargoArtifacts = craneLib.buildDepsOnly (args // {inherit pname version;});
-          clippy = craneLib.cargoClippy (args // {inherit cargoArtifacts;});
-          crate = craneLib.buildPackage (args // {inherit cargoArtifacts;});
-          coverage = craneLib.cargoTarpaulin (args // {inherit cargoArtifacts;});
+
           assets = pkgs.stdenv.mkDerivation {
             inherit version;
-            src = filter {
+            src = nix-filter.lib {
               root = ./.;
               include = [
                 ./assets
@@ -63,21 +43,79 @@
               mv assets $out/assets
             '';
           };
-          app = pkgs.writeShellScriptBin pname ''
-            WEBSERVER_ASSETS=${assets}/assets ${crate}/bin/${pname}
-          '';
+
+          rustToolchain = fenix.packages.${system}.fromToolchainFile {
+            file = ./rust-toolchain.toml;
+            sha256 = "sha256-3jVIIf5XPnUU1CRaTyAiO0XHVbJl12MSx3eucTXCjtE=";
+          };
+
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [(import rust-overlay)];
+          };
+
+          craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
+
+          args = {
+            inherit pname version;
+            src = nix-filter.lib {
+              root = ./.;
+              include = [
+                ./src
+                ./styles
+                ./templates
+                ./Cargo.lock
+                ./Cargo.toml
+              ];
+            };
+            strictDeps = true;
+            buildInputs = with pkgs; [openssl];
+            nativeBuildInputs = with pkgs; [pkg-config];
+          };
+
+          mkCrate = platform: args: let
+            cargoArtifacts = craneLib.buildDepsOnly args;
+            crate = craneLib.buildPackage (args // {inherit cargoArtifacts;});
+          in {
+            "${platform}-crate" = crate;
+            "${platform}-clippy" = craneLib.cargoClippy (args // {inherit cargoArtifacts;});
+            "${platform}-coverage" = craneLib.cargoTarpaulin (args // {inherit cargoArtifacts;});
+            "${platform}-app" = pkgs.writeShellScriptBin pname ''
+              WEBSERVER_ASSETS=${assets}/assets ${crate}/bin/${pname}
+            '';
+          };
+
+          linux = mkCrate "linux" args;
+
+          windows =
+            mkCrate "windows" args
+            // {
+              doCheck = false;
+              CARGO_BUILD_TARGET = "x86_64-pc-windows-gnu";
+              TARGET_CC = "${pkgs.pkgsCross.mingwW64.stdenv.cc}/bin/${pkgs.pkgsCross.mingwW64.stdenv.cc.targetPrefix}cc";
+              OPENSSL_DIR = "${pkgs.openssl.dev}";
+              OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib";
+              OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include/";
+              depsBuildBuild = with pkgs; [
+                pkgsCross.mingwW64.stdenv.cc
+                pkgsCross.mingwW64.windows.pthreads
+              ];
+            };
         in
           with pkgs; {
             checks = {
-              inherit crate clippy coverage;
+              inherit (linux) linux-crate linux-clippy linux-coverage;
+              inherit (windows) windows-crate windows-clippy windows-coverage;
             };
             packages = {
-              inherit crate assets;
-              default = app;
+              inherit assets;
+              inherit (linux) linux-crate linux-clippy linux-coverage;
+              inherit (windows) windows-crate windows-clippy windows-coverage;
+              default = linux.linux-app;
             };
             apps = {
               default = flake-utils.lib.mkApp {
-                drv = app;
+                drv = linux.linux-app;
               };
             };
             devShells = {
@@ -100,6 +138,7 @@
             formatter = alejandra;
           }
       );
+
   nixConfig = {
     extra-substituters = [
       "https://nix-community.cachix.org"
