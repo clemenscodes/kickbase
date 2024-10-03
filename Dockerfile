@@ -50,6 +50,8 @@ WORKDIR /app
 
 FROM base AS build
 
+WORKDIR /app
+
 COPY .moon .moon
 COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
@@ -76,8 +78,7 @@ COPY crates crates
 
 RUN moon run ${APP}/server:styles && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
-  mv target/x86_64-unknown-linux-musl/release/${APP} . && \
-  mv crates/server/assets .
+  mv target/x86_64-unknown-linux-musl/release/${APP} ${APP} &&
 
 FROM alpine:3.20.2 AS start
 
@@ -86,7 +87,7 @@ ENV APP=kickbase
 WORKDIR /app
 
 COPY --from=build /app/${APP} /usr/local/bin/${APP}
-COPY --from=build /app/assets /app/assets
+COPY --from=build /app/crates/server/assets /app/assets
 
 ENV WEBSERVER_ASSETS=/app/assets
 
