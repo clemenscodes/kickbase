@@ -3,49 +3,54 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     crane.url = "github:ipetkov/crane";
-    nix-filter.url = "github:numtide/nix-filter";
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-filter.url = "github:numtide/nix-filter";
   };
   outputs = inputs:
     with inputs;
       flake-utils.lib.eachDefaultSystem (
         system: let
           inherit (nixpkgs) lib;
-          inherit (manifest) name version;
-          overlays = [(import rust-overlay)];
-          pkgs = import nixpkgs {inherit system lib overlays;};
-          manifest = (lib.importTOML ./Cargo.toml).package;
-          filter = nix-filter.lib;
-          pname = name;
-          craneLib = (crane.mkLib pkgs).overrideToolchain (
-            p: p.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml
-          );
-          src = filter {
-            root = ./.;
-            include = [
-              ./src
-              ./styles
-              ./templates
-              ./Cargo.lock
-              ./Cargo.toml
-            ];
+          inherit ((lib.importTOML ./Cargo.toml).package) name version;
+          rustToolchain = fenix.packages.${system}.fromToolchainFile {
+            file = ./rust-toolchain.toml;
+            sha256 = "sha256-3jVIIf5XPnUU1CRaTyAiO0XHVbJl12MSx3eucTXCjtE=";
           };
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [(import rust-overlay)];
+          };
+          craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
           args = {
-            inherit src;
+            src = nix-filter.lib {
+              root = ./.;
+              include = [
+                ./src
+                ./styles
+                ./templates
+                ./Cargo.lock
+                ./Cargo.toml
+              ];
+            };
             strictDeps = true;
             buildInputs = with pkgs; [openssl];
             nativeBuildInputs = with pkgs; [pkg-config];
           };
+          pname = name;
           cargoArtifacts = craneLib.buildDepsOnly (args // {inherit pname version;});
           clippy = craneLib.cargoClippy (args // {inherit cargoArtifacts;});
           crate = craneLib.buildPackage (args // {inherit cargoArtifacts;});
           coverage = craneLib.cargoTarpaulin (args // {inherit cargoArtifacts;});
           assets = pkgs.stdenv.mkDerivation {
             inherit version;
-            src = filter {
+            src = nix-filter.lib {
               root = ./.;
               include = [
                 ./assets
