@@ -23,9 +23,12 @@ RUN apt-get update && \
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN curl -fsSL https://moonrepo.dev/install/proto.sh | bash -s -- 0.40.4 --yes && \
+RUN curl -fsSL https://moonrepo.dev/install/proto.sh | bash -s -- 0.41.3 --yes && \
   proto plugin add moon "https://raw.githubusercontent.com/moonrepo/moon/master/proto-plugin.toml" && \
-  proto install moon
+  proto install moon && \
+  proto install bun
+
+FROM base AS openssl
 
 WORKDIR /openssl
 
@@ -47,38 +50,34 @@ WORKDIR /app
 
 FROM base AS build
 
+COPY .moon .moon
 COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
-COPY .moon .moon
-COPY dockerManifest.json dockerManifest.json
-COPY --from=base /musl /musl
+COPY rust-toolchain.toml rust-toolchain.toml
+COPY crates/server/Cargo.toml crates/server/Cargo.toml
+COPY crates/server/Cargo.lock crates/server/Cargo.lock
+COPY --from=openssl /musl /musl
 
 ENV PKG_CONFIG_ALLOW_CROSS=1
 ENV OPENSSL_STATIC=true
 ENV OPENSSL_DIR=/musl
 
-RUN echo "id: ${APP}" > moon.yml && \
-  echo "project:" >> moon.yml && \
-  echo "  name: ${APP}" >> moon.yml && \
-  echo "  description: ${APP}" >> moon.yml && \
-  moon docker setup && \
-  mkdir src/ && \
-  echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs && \
+RUN mkdir -p crates/server/src && \
+  echo "id: ${APP}/server" > crates/server/moon.yml && \
+  echo "project:" >> crates/server/moon.yml && \
+  echo "  name: ${APP}" >> crates/server/moon.yml && \
+  echo "  description: ${APP}" >> crates/server/moon.yml && \
+  echo "fn main() {println!(\"if you see this, the build broke\")}" > crates/server/src/main.rs && \
   rustup target add x86_64-unknown-linux-musl && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
   rm -rf target/x86_64-unknown-linux-musl/release/deps/${APP}*
 
-COPY tailwind.config.js tailwind.config.js
-COPY moon.yml moon.yml
-COPY styles styles
-COPY assets assets
-COPY templates templates
-COPY src src
+COPY crates crates
 
-RUN moon run ${APP}:styles && \
+RUN moon run ${APP}/server:styles && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
   mv target/x86_64-unknown-linux-musl/release/${APP} . && \
-  moon docker prune
+  mv crates/server/assets .
 
 FROM alpine:3.20.2 AS start
 

@@ -1,4 +1,4 @@
-FROM rust:1.80.1-slim-bullseye 
+FROM rust:1.80.1-slim-bullseye
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL=/bin/bash
@@ -24,14 +24,12 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN curl -fsSL https://moonrepo.dev/install/proto.sh | bash -s -- 0.40.4 --yes && \
   proto plugin add moon "https://raw.githubusercontent.com/moonrepo/moon/master/proto-plugin.toml" && \
-  proto install moon
+  proto install moon && \
+  proto install bun
 
 WORKDIR /app
 
 COPY .moon .moon
 COPY .prototools .prototools
-COPY dockerManifest.json dockerManifest.json
-COPY moon.yml moon.yml
 
-RUN moon docker setup && \
-  cargo install cargo-watch --locked
+RUN cargo install cargo-watch --locked
