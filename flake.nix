@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
     crane.url = "github:ipetkov/crane";
     fenix = {
       url = "github:nix-community/fenix";
@@ -16,8 +16,17 @@
 
   outputs = inputs:
     with inputs;
-      flake-utils.lib.eachDefaultSystem (
-        system: let
+      flake-parts.lib.mkFlake {inherit inputs;} {
+        systems = [
+          "x86_64-linux"
+          "aarch64-linux"
+        ];
+
+        perSystem = {
+          pkgs,
+          system,
+          ...
+        }: let
           inherit (nixpkgs) lib;
           inherit ((lib.importTOML ./Cargo.toml).package) name version;
 
@@ -136,8 +145,8 @@
               };
             };
             formatter = alejandra;
-          }
-      );
+          };
+      };
 
   nixConfig = {
     extra-substituters = [
