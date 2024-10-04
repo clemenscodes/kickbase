@@ -56,26 +56,28 @@ COPY .moon .moon
 COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
 COPY rust-toolchain.toml rust-toolchain.toml
-COPY crates/server/Cargo.toml crates/server/Cargo.toml
+COPY crates/api/Cargo.toml crates/api/Cargo.toml
+COPY crates/kickbase/Cargo.toml crates/kickbase/Cargo.toml
 COPY --from=openssl /musl /musl
 
 ENV PKG_CONFIG_ALLOW_CROSS=1
 ENV OPENSSL_STATIC=true
 ENV OPENSSL_DIR=/musl
 
-RUN mkdir -p crates/server/src && \
-  echo "id: ${APP}/server" > crates/server/moon.yml && \
-  echo "project:" >> crates/server/moon.yml && \
-  echo "  name: ${APP}" >> crates/server/moon.yml && \
-  echo "  description: ${APP}" >> crates/server/moon.yml && \
-  echo "fn main() {println!(\"if you see this, the build broke\")}" > crates/server/src/main.rs && \
+RUN mkdir -p crates/kickbase/src crates/api/src && \
+  echo "id: ${APP}/app" > crates/kickbase/moon.yml && \
+  echo "project:" >> crates/kickbase/moon.yml && \
+  echo "  name: ${APP}/app" >> crates/kickbase/moon.yml && \
+  echo "  description: ${APP}" >> crates/kickbase/moon.yml && \
+  touch crates/api/src/lib.rs && \
+  echo "fn main() {println!(\"if you see this, the build broke\")}" > crates/kickbase/src/main.rs && \
   rustup target add x86_64-unknown-linux-musl && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
   rm -rf target/x86_64-unknown-linux-musl/release/deps/${APP}*
 
 COPY crates crates
 
-RUN moon run ${APP}/server:styles && \
+RUN moon run ${APP}/app:styles && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
   mv target/x86_64-unknown-linux-musl/release/${APP} ${APP}
 
@@ -86,7 +88,7 @@ ENV APP=kickbase
 WORKDIR /app
 
 COPY --from=build /app/${APP} /usr/local/bin/${APP}
-COPY --from=build /app/crates/server/assets /app/assets
+COPY --from=build /app/crates/kickbase/assets /app/assets
 
 ENV WEBSERVER_ASSETS=/app/assets
 

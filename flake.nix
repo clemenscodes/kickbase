@@ -58,7 +58,7 @@
           assets = pkgs.stdenv.mkDerivation {
             inherit version;
             src = nix-filter.lib {
-              root = ./crates/server/.;
+              root = ./crates/kickbase/.;
               include = [
                 "assets"
                 "styles"
@@ -140,26 +140,26 @@
               ];
             });
 
-          server = craneLib.buildPackage (individualCrateArgs
+          kickbase = craneLib.buildPackage (individualCrateArgs
             // rec {
-              pname = "server";
+              pname = "kickbase";
               cargoExtraArgs = "-p ${pname}";
               src = fileSetForCrate [
                 ./crates/api
-                ./crates/server/src
-                ./crates/server/templates
-                ./crates/server/styles
-                ./crates/server/Cargo.toml
+                ./crates/kickbase/src
+                ./crates/kickbase/templates
+                ./crates/kickbase/styles
+                ./crates/kickbase/Cargo.toml
               ];
             });
 
           app = pkgs.writeShellScriptBin pname ''
-            WEBSERVER_ASSETS=${assets}/assets ${server}/bin/server
+            WEBSERVER_ASSETS=${assets}/assets ${kickbase}/bin/kickbase
           '';
         in {
           checks = {
-            inherit app api server assets;
-            inherit (self.packages.${system}) kickbase;
+            inherit app api kickbase assets;
+            inherit (self.packages.${system}) services;
 
             clippy = craneLib.cargoClippy (args
               // {
@@ -203,14 +203,14 @@
           };
 
           packages = {
-            inherit app api server assets;
+            inherit app api kickbase assets;
             inherit (self.checks.${system}) coverage;
             default = self.packages.${system}.app;
           };
 
           apps = {
             default = {
-              program = self.packages.${system}.default;
+              program = self.packages.${system}.services;
             };
           };
 
@@ -236,7 +236,7 @@
           };
 
           process-compose = {
-            kickbase = {
+            services = {
               imports = [
                 services-flake.processComposeModules.default
               ];
