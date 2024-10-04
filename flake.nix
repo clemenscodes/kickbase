@@ -205,7 +205,7 @@
           packages = {
             inherit app api server assets;
             inherit (self.checks.${system}) coverage;
-            default = self.packages.${system}.kickbase;
+            default = self.packages.${system}.app;
           };
 
           apps = {

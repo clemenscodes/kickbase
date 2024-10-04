@@ -5,14 +5,12 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
-axum = "0.7.5"
-reqwest = { version = "0.12.7", features = ["json"] }
-serde = { version = "1.0.209", features = ["derive"] }
-serde_json = "1.0.127"
-thiserror = "1.0.63"
-tokio = { version = "1.39.3", features = ["full"] }
-tower = "0.5.0"
-tower-http = { version = "0.6.1", features = ["fs"] }
-tracing = "0.1.40"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
-url = "2.5.2"
+axum.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+url.workspace = true
