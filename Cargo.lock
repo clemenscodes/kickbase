@@ -27,6 +27,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "api"
+version = "0.1.1"
+dependencies = [
+ "axum",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+]
+
+[[package]]
 name = "askama"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -565,6 +582,7 @@ dependencies = [
 name = "kickbase"
 version = "0.1.1"
 dependencies = [
+ "api",
  "askama",
  "askama_axum",
  "axum",

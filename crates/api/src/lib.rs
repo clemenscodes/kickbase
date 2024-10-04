@@ -1,7 +1,9 @@
-use super::constants::API;
-use crate::http::HttpClient;
+pub mod http;
+use http::HttpClient;
 use std::sync::LazyLock;
 use tokio::sync::RwLock;
+
+pub const API: &str = "https://api.kickbase.com";
 
 pub static HTTP: LazyLock<RwLock<HttpClient>> = LazyLock::new(|| {
   let client = HttpClient::new(API).unwrap();
