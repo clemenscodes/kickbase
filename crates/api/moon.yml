@@ -1,40 +1,18 @@
 # https://moonrepo.dev/docs/config/project
 $schema: "https://moonrepo.dev/schemas/project.json"
-id: "kickbase"
+id: "kickbase/api"
 project:
-  name: "kickbase"
-  description: "kickbase"
+  name: "kickbase/api"
+  description: "KICKBASE API"
 tags:
   - "kickbase"
+  - "api"
 type: "application"
 language: "rust"
 platform: "rust"
-docker:
-  file:
-    buildTask: "build"
-    image: rust:1.80.1-slim-bullseye
-    startTask: "target/release/kickbase"
-  scaffold:
-    include:
-      - "templates/**/*"
-      - "assets/**/*"
-      - "styles/**/*"
-      - "tailwind.config.js"
 tasks:
-  dev:
-    command: "cargo watch -c -w src -w templates -w styles -- moon run start"
-  styles:
-    command: "bunx tailwindcss -i styles/tailwind.css -o assets/main.css"
-    platform: "system"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-    outputs:
-      - "assets/main.css"
   build:
     command: "cargo build"
-    deps:
-      - "styles"
     inputs:
       - "@group(sources)"
       - "@group(configs)"
@@ -71,11 +49,4 @@ tasks:
     inputs:
       - "@group(sources)"
       - "@group(configs)"
-  lpi:
-    command: "lpi"
-    platform: "system"
-    options:
-      cache: false
-      runFromWorkspaceRoot: true
-    env:
-      MOON: "$workspaceRoot"
+

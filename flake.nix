@@ -1,20 +1,45 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
-    process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
-    services-flake.url = "github:juspay/services-flake";
-    crane.url = "github:ipetkov/crane";
+    nixpkgs = {
+      url = "github:NixOS/nixpkgs/nixos-unstable";
+    };
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+    };
+    crane = {
+      url = "github:ipetkov/crane";
+    };
     fenix = {
       url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
-    nix-filter.url = "github:numtide/nix-filter";
+    advisory-db = {
+      url = "github:rustsec/advisory-db";
+      flake = false;
+    };
+    nix-filter = {
+      url = "github:numtide/nix-filter";
+    };
+    process-compose-flake = {
+      url = "github:Platonic-Systems/process-compose-flake";
+    };
+    services-flake = {
+      url = "github:juspay/services-flake";
+    };
   };
+
   outputs = inputs:
     with inputs;
       flake-parts.lib.mkFlake {inherit inputs;} {
@@ -30,20 +55,15 @@
           system,
           ...
         }: let
-          inherit (nixpkgs) lib;
-          inherit ((lib.importTOML ./Cargo.toml).package) name version;
-
-          pname = name;
-
           assets = pkgs.stdenv.mkDerivation {
             inherit version;
             src = nix-filter.lib {
-              root = ./.;
+              root = ./crates/kickbase/.;
               include = [
-                ./assets
-                ./styles
-                ./templates
-                ./tailwind.config.js
+                "assets"
+                "styles"
+                "templates"
+                "tailwind.config.js"
               ];
             };
             pname = "${pname}-assets";
@@ -58,7 +78,7 @@
 
           rustToolchain = fenix.packages.${system}.fromToolchainFile {
             file = ./rust-toolchain.toml;
-            sha256 = "sha256-3jVIIf5XPnUU1CRaTyAiO0XHVbJl12MSx3eucTXCjtE=";
+            sha256 = "sha256-VZZnlyP69+Y3crrLHQyJirqlHrTtGTsyiSnZB8jEvVo=";
           };
 
           pkgs = import nixpkgs {
@@ -68,102 +88,170 @@
 
           craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
+          src = nix-filter.lib {
+            root = ./.;
+            include = [
+              ./Cargo.toml
+              ./Cargo.lock
+              ./taplo.toml
+              ./rustfmt.toml
+              ./rust-toolchain.toml
+              ./deny.toml
+              ./crates
+            ];
+          };
+
+          inherit (craneLib.crateNameFromCargoToml {inherit src;}) pname version;
+
           args = {
-            inherit pname version;
-            src = nix-filter.lib {
-              root = ./.;
-              include = [
-                ./src
-                ./styles
-                ./templates
-                ./Cargo.lock
-                ./Cargo.toml
-              ];
-            };
+            inherit src;
             strictDeps = true;
             buildInputs = with pkgs; [openssl];
             nativeBuildInputs = with pkgs; [pkg-config];
           };
 
-          mkCrate = platform: args: let
-            cargoArtifacts = craneLib.buildDepsOnly args;
-            crate = craneLib.buildPackage (args // {inherit cargoArtifacts;});
-          in {
-            "${platform}-crate" = crate;
-            "${platform}-clippy" = craneLib.cargoClippy (args // {inherit cargoArtifacts;});
-            "${platform}-coverage" = craneLib.cargoTarpaulin (args // {inherit cargoArtifacts;});
-            "${platform}-app" = pkgs.writeShellScriptBin pname ''
-              WEBSERVER_ASSETS=${assets}/assets ${crate}/bin/${pname}
-            '';
+          individualCrateArgs =
+            args
+            // {
+              inherit cargoArtifacts version;
+              doCheck = false;
+            };
+
+          fileSetForCrate = crateFiles:
+            nix-filter.lib {
+              root = ./.;
+              include =
+                [
+                  ./Cargo.toml
+                  ./Cargo.lock
+                ]
+                ++ crateFiles;
+            };
+
+          cargoArtifacts = craneLib.buildDepsOnly args;
+
+          api = craneLib.buildPackage (individualCrateArgs
+            // rec {
+              pname = "api";
+              cargoExtraArgs = "-p ${pname}";
+              src = fileSetForCrate [
+                ./crates/api/src
+                ./crates/api/Cargo.toml
+              ];
+            });
+
+          kickbase = craneLib.buildPackage (individualCrateArgs
+            // rec {
+              pname = "kickbase";
+              cargoExtraArgs = "-p ${pname}";
+              src = fileSetForCrate [
+                ./crates/api
+                ./crates/kickbase/src
+                ./crates/kickbase/templates
+                ./crates/kickbase/styles
+                ./crates/kickbase/Cargo.toml
+              ];
+            });
+
+          app = pkgs.writeShellScriptBin pname ''
+            WEBSERVER_ASSETS=${assets}/assets ${kickbase}/bin/kickbase
+          '';
+        in {
+          checks = {
+            inherit app api kickbase assets;
+            inherit (self.packages.${system}) services;
+
+            clippy = craneLib.cargoClippy (args
+              // {
+                inherit cargoArtifacts;
+                cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+              });
+
+            doc = craneLib.cargoDoc (args
+              // {
+                inherit cargoArtifacts;
+              });
+
+            fmt = craneLib.cargoFmt {
+              inherit src;
+            };
+
+            toml-fmt = craneLib.taploFmt {
+              src = pkgs.lib.sources.sourceFilesBySuffices src [".toml"];
+              taploExtraArgs = "--config ./taplo.toml";
+            };
+
+            audit = craneLib.cargoAudit {
+              inherit src advisory-db;
+            };
+
+            deny = craneLib.cargoDeny {
+              inherit src;
+            };
+
+            nextest = craneLib.cargoNextest (args
+              // {
+                inherit cargoArtifacts;
+                partitions = 1;
+                partitionType = "count";
+              });
+
+            coverage = craneLib.cargoLlvmCov (args
+              // {
+                inherit cargoArtifacts;
+              });
           };
 
-          linux = mkCrate "linux" args;
+          packages = {
+            inherit app api kickbase assets;
+            inherit (self.checks.${system}) coverage;
+            default = self.packages.${system}.app;
+          };
 
-          windows =
-            mkCrate "windows" args
-            // {
-              doCheck = false;
-              CARGO_BUILD_TARGET = "x86_64-pc-windows-gnu";
-              TARGET_CC = "${pkgs.pkgsCross.mingwW64.stdenv.cc}/bin/${pkgs.pkgsCross.mingwW64.stdenv.cc.targetPrefix}cc";
-              OPENSSL_DIR = "${pkgs.openssl.dev}";
-              OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib";
-              OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include/";
-              depsBuildBuild = with pkgs; [
-                pkgsCross.mingwW64.stdenv.cc
-                pkgsCross.mingwW64.windows.pthreads
+          apps = {
+            default = {
+              program = self.packages.${system}.services;
+            };
+          };
+
+          devShells = {
+            default = craneLib.devShell {
+              checks = self.checks.${system};
+              packages = with pkgs; [
+                rust-analyzer
+                proto
+                moon
+                alejandra
+                hadolint
+                tailwindcss
+                bun
+                cargo-watch
+                cargo-nextest
+                cargo-hakari
+                taplo
               ];
+              RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
+              RUST_BACKTRACE = 1;
             };
-        in
-          with pkgs; {
-            formatter = alejandra;
-            checks = {
-              inherit assets;
-              inherit (linux) linux-crate linux-clippy linux-coverage;
-              inherit (windows) windows-crate windows-clippy windows-coverage;
-            };
-            packages = {
-              inherit assets;
-              inherit (linux) linux-crate linux-clippy linux-coverage;
-              inherit (windows) windows-crate windows-clippy windows-coverage;
-              default = self.packages.${system}.kickbase;
-            };
-            apps = {
-              default = {
-                program = self.packages.${system}.default;
-              };
-            };
-            devShells = {
-              default = craneLib.devShell {
-                checks = self.checks.${system};
-                packages = [
-                  rust-analyzer
-                  proto
-                  moon
-                  alejandra
-                  hadolint
-                  cargo-watch
-                  tailwindcss
-                  bun
-                ];
-                RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
-                RUST_BACKTRACE = 1;
-              };
-            };
-            process-compose = {
-              kickbase = {
-                imports = [
-                  services-flake.processComposeModules.default
-                ];
-                settings = {
-                  processes = {
-                    server = {
-                      command = "${self.packages.${system}.linux-crate}/bin/kickbase";
-                    };
+          };
+
+          process-compose = {
+            services = {
+              imports = [
+                services-flake.processComposeModules.default
+              ];
+              settings = {
+                processes = {
+                  server = {
+                    command = "${self.packages.${system}.app}/bin/${pname}";
                   };
                 };
               };
             };
           };
+
+          formatter = pkgs.alejandra;
+        };
       };
 
   nixConfig = {

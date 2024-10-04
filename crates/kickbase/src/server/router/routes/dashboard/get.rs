@@ -1,4 +1,5 @@
-use crate::server::{html::HtmlTemplate, http::HTTP};
+use crate::server::html::HtmlTemplate;
+use api::HTTP;
 use askama::Template;
 use askama_axum::IntoResponse;
 use axum::{extract::Request, http::HeaderMap};

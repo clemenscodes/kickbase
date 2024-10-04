@@ -3,7 +3,6 @@ $schema: "https://moonrepo.dev/schemas/tasks.json"
 implicitInputs:
   - "/flake.lock"
   - "/flake.nix"
-  - "/default.nix"
   - "/Cargo.lock"
   - "/Cargo.toml"
 

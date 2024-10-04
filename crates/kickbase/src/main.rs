@@ -1,4 +1,3 @@
-mod http;
 mod server;
 mod trace;
 

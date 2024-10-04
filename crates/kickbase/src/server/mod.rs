@@ -1,7 +1,5 @@
 mod address;
-mod constants;
 mod html;
-mod http;
 mod port;
 mod router;
 
