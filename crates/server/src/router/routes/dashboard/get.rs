@@ -1,5 +1,5 @@
 use crate::html::HtmlTemplate;
-use api::{http::user::User, KICKBASE};
+use api::{user::User, KICKBASE};
 use askama::Template;
 use askama_axum::IntoResponse;
 

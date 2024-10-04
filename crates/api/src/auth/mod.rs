@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-
 use super::{HttpClient, HttpClientError, HttpResponse};
 use reqwest::Method;
 use serde::Deserialize;
+use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
 pub struct LoginPayload {

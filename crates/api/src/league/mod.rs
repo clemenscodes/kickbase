@@ -1,6 +1,5 @@
-use reqwest::Method;
-
 use super::{HttpClient, HttpClientError};
+use reqwest::Method;
 
 #[derive(Debug)]
 pub struct League {

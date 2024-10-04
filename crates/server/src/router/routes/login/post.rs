@@ -1,5 +1,5 @@
 use crate::html::HtmlTemplate;
-use api::{http::auth::LoginPayload, KICKBASE};
+use api::{auth::LoginPayload, KICKBASE};
 use askama::Template;
 use askama_axum::IntoResponse;
 use axum::{http::HeaderValue, response::Response, Json};

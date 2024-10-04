@@ -1,7 +1,6 @@
+use crate::html::HtmlTemplate;
 use askama::Template;
 use askama_axum::IntoResponse;
-
-use crate::html::HtmlTemplate;
 
 #[derive(Template)]
 #[template(path = "pages/login/get.html")]
