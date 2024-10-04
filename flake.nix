@@ -58,7 +58,7 @@
           assets = pkgs.stdenv.mkDerivation {
             inherit version;
             src = nix-filter.lib {
-              root = ./crates/kickbase/.;
+              root = ./crates/server/.;
               include = [
                 "assets"
                 "styles"
@@ -140,16 +140,30 @@
               ];
             });
 
+          server = craneLib.buildPackage (individualCrateArgs
+            // rec {
+              pname = "server";
+              cargoExtraArgs = "-p ${pname}";
+              src = fileSetForCrate [
+                ./crates/api
+                ./crates/server/src
+                ./crates/server/templates
+                ./crates/server/styles
+                ./crates/server/Cargo.toml
+              ];
+            });
+
           kickbase = craneLib.buildPackage (individualCrateArgs
             // rec {
               pname = "kickbase";
               cargoExtraArgs = "-p ${pname}";
               src = fileSetForCrate [
                 ./crates/api
-                ./crates/kickbase/src
-                ./crates/kickbase/templates
-                ./crates/kickbase/styles
-                ./crates/kickbase/Cargo.toml
+                ./crates/kickbase
+                ./crates/server/src
+                ./crates/server/templates
+                ./crates/server/styles
+                ./crates/server/Cargo.toml
               ];
             });
 
@@ -158,7 +172,7 @@
           '';
         in {
           checks = {
-            inherit app api kickbase assets;
+            inherit app api server kickbase assets;
             inherit (self.packages.${system}) services;
 
             clippy = craneLib.cargoClippy (args
@@ -203,7 +217,7 @@
           };
 
           packages = {
-            inherit app api kickbase assets;
+            inherit app api server kickbase assets;
             inherit (self.checks.${system}) coverage;
             default = self.packages.${system}.app;
           };

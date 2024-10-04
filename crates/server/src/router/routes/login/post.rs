@@ -1,4 +1,4 @@
-use crate::server::html::HtmlTemplate;
+use crate::html::HtmlTemplate;
 use api::HTTP;
 use askama::Template;
 use askama_axum::IntoResponse;
