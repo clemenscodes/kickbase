@@ -1,7 +1,7 @@
-mod address;
-mod html;
-mod port;
-mod router;
+pub mod address;
+pub mod html;
+pub mod port;
+pub mod router;
 
 use address::get_address;
 use tokio::net::TcpListener;

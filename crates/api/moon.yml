@@ -3,7 +3,7 @@ $schema: "https://moonrepo.dev/schemas/project.json"
 id: "kickbase/api"
 project:
   name: "kickbase/api"
-  description: "KICKBASE API"
+  description: "kickbase"
 tags:
   - "kickbase"
   - "api"
@@ -12,41 +12,12 @@ language: "rust"
 platform: "rust"
 tasks:
   build:
-    command: "cargo build"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-    outputs:
-      - "target/"
-  start:
-    local: true
-    command: "cargo run --release"
-    deps:
-      - "styles"
+    command: "cargo build -p api"
   release:
-    command: "cargo build --release"
-    deps:
-      - "styles"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-    outputs:
-      - "target/"
+    command: "cargo build -p api --release"
   test:
-    command: "cargo test"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-    outputs:
-      - "target/"
+    command: "cargo test -p api"
   format:
-    command: "cargo fmt"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
+    command: "cargo fmt -p api"
   lint:
-    command: "cargo clippy"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-
+    command: "cargo clippy -p api"

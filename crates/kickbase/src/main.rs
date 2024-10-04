@@ -1,5 +1,4 @@
-mod server;
-mod trace;
+pub mod trace;
 
 #[tokio::main]
 async fn main() {

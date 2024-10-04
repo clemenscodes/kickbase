@@ -1,0 +1,29 @@
+# https://moonrepo.dev/docs/config/project
+$schema: "https://moonrepo.dev/schemas/project.json"
+id: "kickbase/server"
+project:
+  name: "kickbase/server"
+  description: "kickbase"
+tags:
+  - "kickbase"
+type: "application"
+language: "rust"
+platform: "rust"
+tasks:
+  styles:
+    command: "bunx tailwindcss -i styles/tailwind.css -o assets/main.css"
+    platform: "system"
+  build:
+    deps:
+      - "styles"
+    command: "cargo build -p server"
+  release:
+    deps:
+      - "styles"
+    command: "cargo build -p server --release"
+  test:
+    command: "cargo test -p server"
+  format:
+    command: "cargo fmt -p server"
+  lint:
+    command: "cargo clippy -p server"
