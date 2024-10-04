@@ -1,3 +1,6 @@
+pub mod league;
+pub mod user;
+
 use axum::http::HeaderMap;
 use reqwest::{Client, Method, StatusCode, Url};
 use serde::Serialize;
