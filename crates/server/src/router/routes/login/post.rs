@@ -1,11 +1,8 @@
 use crate::html::HtmlTemplate;
-use api::HTTP;
+use api::{http::auth::LoginPayload, KICKBASE};
 use askama::Template;
 use askama_axum::IntoResponse;
 use axum::{http::HeaderValue, response::Response, Json};
-use reqwest::{header, Method};
-use serde::Deserialize;
-use std::collections::HashMap;
 
 #[derive(Template)]
 #[template(path = "pages/login/post.html")]
@@ -13,24 +10,8 @@ pub struct Html {
   pub message: String,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct Payload {
-  pub email: String,
-  pub password: String,
-}
-
-pub async fn route(Json(payload): Json<Payload>) -> Response {
-  let mut map = HashMap::new();
-
-  map.insert("email", payload.email);
-  map.insert("password", payload.password);
-
-  let response = HTTP
-    .read()
-    .await
-    .req(Method::POST, "/user/login", Some(&map), None)
-    .await
-    .unwrap();
+pub async fn route(Json(payload): Json<LoginPayload>) -> Response {
+  let response = KICKBASE.read().await.login(payload).await.unwrap();
 
   let status = response.status;
 
@@ -42,23 +23,11 @@ pub async fn route(Json(payload): Json<Payload>) -> Response {
     return HtmlTemplate(template).into_response();
   }
 
-  let token = response
-    .value
-    .get("token")
-    .map(|token| token.to_string().replace("\"", ""))
-    .unwrap();
-
-  let cookie = format!("kkstrauth={token}");
-
   let template = Html {
     message: String::from("Logged in"),
   };
 
   let mut html = HtmlTemplate(template).into_response();
-
-  html
-    .headers_mut()
-    .insert(header::SET_COOKIE, HeaderValue::from_str(&cookie).unwrap());
 
   html
     .headers_mut()

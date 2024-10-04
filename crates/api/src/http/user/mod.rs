@@ -1,6 +1,4 @@
-use super::{league::League, HttpClient};
-use crate::HTTP;
-use axum::http::HeaderMap;
+use super::{league::League, HttpClient, HttpClientError};
 use reqwest::Method;
 
 #[derive(Debug)]
@@ -12,17 +10,12 @@ pub struct User {
 }
 
 impl HttpClient {
-  pub async fn get_user(&self, headers: Option<HeaderMap>) -> User {
-    let response = HTTP
-      .read()
-      .await
-      .get(Method::GET, "/user/me", headers.clone())
-      .await
-      .unwrap();
+  pub async fn get_user(&self) -> Result<User, HttpClientError> {
+    let response = self.get(Method::GET, "/user/me", None).await?;
 
     let user = response.value.get("user").unwrap();
 
-    let leagues = self.get_leagues(headers).await;
+    let leagues = self.get_leagues().await?;
 
     let user = User {
       id: user.get("id").unwrap().to_string().replace("\"", ""),
@@ -31,6 +24,6 @@ impl HttpClient {
       leagues,
     };
 
-    user
+    Ok(user)
   }
 }

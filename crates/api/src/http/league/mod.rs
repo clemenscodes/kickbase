@@ -1,9 +1,6 @@
-use axum::http::HeaderMap;
 use reqwest::Method;
 
-use crate::HTTP;
-
-use super::HttpClient;
+use super::{HttpClient, HttpClientError};
 
 #[derive(Debug)]
 pub struct League {
@@ -15,13 +12,8 @@ pub struct League {
 }
 
 impl HttpClient {
-  pub async fn get_leagues(&self, headers: Option<HeaderMap>) -> Vec<League> {
-    let response = HTTP
-      .read()
-      .await
-      .get(Method::GET, "/leagues", headers)
-      .await
-      .unwrap();
+  pub async fn get_leagues(&self) -> Result<Vec<League>, HttpClientError> {
+    let response = self.get(Method::GET, "/leagues", None).await.unwrap();
 
     let leagues: Vec<League> = response
       .value
@@ -51,6 +43,6 @@ impl HttpClient {
       })
       .collect();
 
-    leagues
+    Ok(leagues)
   }
 }

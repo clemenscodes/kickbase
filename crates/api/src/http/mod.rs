@@ -1,10 +1,12 @@
+pub mod auth;
 pub mod league;
 pub mod user;
 
 use axum::http::HeaderMap;
-use reqwest::{Client, Method, StatusCode, Url};
+use reqwest::{cookie::Jar, Client, ClientBuilder, Method, StatusCode, Url};
 use serde::Serialize;
 use serde_json::{json, Value};
+use std::sync::Arc;
 use thiserror::Error;
 use tracing::{debug, warn};
 
@@ -22,7 +24,9 @@ pub struct HttpResponse {
 
 impl HttpClient {
   pub fn new(base_url: &str) -> Result<Self, HttpClientError> {
-    let client = Client::new();
+    let cookies = Arc::new(Jar::default());
+
+    let client = ClientBuilder::new().cookie_provider(cookies).build()?;
 
     let base_url = Url::parse(base_url)?;
 
