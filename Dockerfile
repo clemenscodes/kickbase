@@ -73,12 +73,13 @@ RUN mkdir -p crates/kickbase/src crates/api/src && \
   echo "fn main() {println!(\"if you see this, the build broke\")}" > crates/kickbase/src/main.rs && \
   rustup target add x86_64-unknown-linux-musl && \
   cargo build --release --target=x86_64-unknown-linux-musl && \
-  rm -rf target/x86_64-unknown-linux-musl/release/deps/${APP}*
+  rm -rf target/x86_64-unknown-linux-musl/release/deps/${APP}* && \
+  rm -rf target/x86_64-unknown-linux-musl/release/deps/libapi*
 
 COPY crates crates
 
 RUN moon run ${APP}/app:styles && \
-  cargo build --release --target=x86_64-unknown-linux-musl && \
+  cargo build -p ${APP} --release --target=x86_64-unknown-linux-musl && \
   mv target/x86_64-unknown-linux-musl/release/${APP} ${APP}
 
 FROM alpine:3.20.2 AS start
