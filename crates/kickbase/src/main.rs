@@ -1,6 +1,8 @@
+pub mod trace;
+
 #[tokio::main]
 async fn main() {
-  server::trace::setup_tracing();
+  trace::setup_tracing();
 
   if let Err(err) = server::start_server().await {
     tracing::error!("Server encountered a critical error: {}", err);
