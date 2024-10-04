@@ -13,6 +13,10 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    advisory-db = {
+      url = "github:rustsec/advisory-db";
+      flake = false;
+    };
     nix-filter.url = "github:numtide/nix-filter";
   };
   outputs = inputs:
@@ -30,8 +34,6 @@
           system,
           ...
         }: let
-          inherit (pkgs) lib;
-
           assets = pkgs.stdenv.mkDerivation {
             inherit version;
             src = nix-filter.lib {
@@ -65,7 +67,18 @@
 
           craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
-          src = craneLib.cleanCargoSource ./.;
+          src = nix-filter.lib {
+            root = ./.;
+            include = [
+              ./Cargo.toml
+              ./Cargo.lock
+              ./taplo.toml
+              ./rustfmt.toml
+              ./rust-toolchain.toml
+              ./deny.toml
+              ./crates
+            ];
+          };
 
           inherit (craneLib.crateNameFromCargoToml {inherit src;}) pname version;
 
@@ -126,7 +139,42 @@
           with pkgs; {
             formatter = alejandra;
             checks = {
-              inherit api server assets;
+              inherit app api server assets;
+
+              clippy = craneLib.cargoClippy (args
+                // {
+                  inherit cargoArtifacts;
+                  cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+                });
+
+              doc = craneLib.cargoDoc (args
+                // {
+                  inherit cargoArtifacts;
+                });
+
+              fmt = craneLib.cargoFmt {
+                inherit src;
+              };
+
+              toml-fmt = craneLib.taploFmt {
+                src = pkgs.lib.sources.sourceFilesBySuffices src [".toml"];
+                taploExtraArgs = "--config ./taplo.toml";
+              };
+
+              audit = craneLib.cargoAudit {
+                inherit src advisory-db;
+              };
+
+              deny = craneLib.cargoDeny {
+                inherit src;
+              };
+
+              nextest = craneLib.cargoNextest (args
+                // {
+                  inherit cargoArtifacts;
+                  partitions = 1;
+                  partitionType = "count";
+                });
             };
             packages = {
               inherit app api server assets;
@@ -149,6 +197,7 @@
                   cargo-watch
                   tailwindcss
                   bun
+                  taplo
                 ];
                 RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
                 RUST_BACKTRACE = 1;
