@@ -1,24 +1,45 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
-    process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
-    services-flake.url = "github:juspay/services-flake";
-    crane.url = "github:ipetkov/crane";
+    nixpkgs = {
+      url = "github:NixOS/nixpkgs/nixos-unstable";
+    };
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+    };
+    crane = {
+      url = "github:ipetkov/crane";
+    };
     fenix = {
       url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
     advisory-db = {
       url = "github:rustsec/advisory-db";
       flake = false;
     };
-    nix-filter.url = "github:numtide/nix-filter";
+    nix-filter = {
+      url = "github:numtide/nix-filter";
+    };
+    process-compose-flake = {
+      url = "github:Platonic-Systems/process-compose-flake";
+    };
+    services-flake = {
+      url = "github:juspay/services-flake";
+    };
   };
+
   outputs = inputs:
     with inputs;
       flake-parts.lib.mkFlake {inherit inputs;} {
@@ -135,89 +156,102 @@
           app = pkgs.writeShellScriptBin pname ''
             WEBSERVER_ASSETS=${assets}/assets ${server}/bin/server
           '';
-        in
-          with pkgs; {
-            formatter = alejandra;
-            checks = {
-              inherit app api server assets;
+        in {
+          checks = {
+            inherit app api server assets;
+            inherit (self.packages.${system}) kickbase;
 
-              clippy = craneLib.cargoClippy (args
-                // {
-                  inherit cargoArtifacts;
-                  cargoClippyExtraArgs = "--all-targets -- --deny warnings";
-                });
+            clippy = craneLib.cargoClippy (args
+              // {
+                inherit cargoArtifacts;
+                cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+              });
 
-              doc = craneLib.cargoDoc (args
-                // {
-                  inherit cargoArtifacts;
-                });
+            doc = craneLib.cargoDoc (args
+              // {
+                inherit cargoArtifacts;
+              });
 
-              fmt = craneLib.cargoFmt {
-                inherit src;
-              };
-
-              toml-fmt = craneLib.taploFmt {
-                src = pkgs.lib.sources.sourceFilesBySuffices src [".toml"];
-                taploExtraArgs = "--config ./taplo.toml";
-              };
-
-              audit = craneLib.cargoAudit {
-                inherit src advisory-db;
-              };
-
-              deny = craneLib.cargoDeny {
-                inherit src;
-              };
-
-              nextest = craneLib.cargoNextest (args
-                // {
-                  inherit cargoArtifacts;
-                  partitions = 1;
-                  partitionType = "count";
-                });
+            fmt = craneLib.cargoFmt {
+              inherit src;
             };
-            packages = {
-              inherit app api server assets;
-              default = self.packages.${system}.kickbase;
+
+            toml-fmt = craneLib.taploFmt {
+              src = pkgs.lib.sources.sourceFilesBySuffices src [".toml"];
+              taploExtraArgs = "--config ./taplo.toml";
             };
-            apps = {
-              default = {
-                program = self.packages.${system}.default;
-              };
+
+            audit = craneLib.cargoAudit {
+              inherit src advisory-db;
             };
-            devShells = {
-              default = craneLib.devShell {
-                checks = self.checks.${system};
-                packages = [
-                  rust-analyzer
-                  proto
-                  moon
-                  alejandra
-                  hadolint
-                  cargo-watch
-                  tailwindcss
-                  bun
-                  taplo
-                ];
-                RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
-                RUST_BACKTRACE = 1;
-              };
+
+            deny = craneLib.cargoDeny {
+              inherit src;
             };
-            process-compose = {
-              kickbase = {
-                imports = [
-                  services-flake.processComposeModules.default
-                ];
-                settings = {
-                  processes = {
-                    server = {
-                      command = "${self.packages.${system}.app}/bin/${pname}";
-                    };
+
+            nextest = craneLib.cargoNextest (args
+              // {
+                inherit cargoArtifacts;
+                partitions = 1;
+                partitionType = "count";
+              });
+
+            coverage = craneLib.cargoLlvmCov (args
+              // {
+                inherit cargoArtifacts;
+              });
+          };
+
+          packages = {
+            inherit app api server assets;
+            inherit (self.checks.${system}) coverage;
+            default = self.packages.${system}.kickbase;
+          };
+
+          apps = {
+            default = {
+              program = self.packages.${system}.default;
+            };
+          };
+
+          devShells = {
+            default = craneLib.devShell {
+              checks = self.checks.${system};
+              packages = with pkgs; [
+                rust-analyzer
+                proto
+                moon
+                alejandra
+                hadolint
+                tailwindcss
+                bun
+                cargo-watch
+                cargo-nextest
+                cargo-hakari
+                taplo
+              ];
+              RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
+              RUST_BACKTRACE = 1;
+            };
+          };
+
+          process-compose = {
+            kickbase = {
+              imports = [
+                services-flake.processComposeModules.default
+              ];
+              settings = {
+                processes = {
+                  server = {
+                    command = "${self.packages.${system}.app}/bin/${pname}";
                   };
                 };
               };
             };
           };
+
+          formatter = pkgs.alejandra;
+        };
       };
 
   nixConfig = {
