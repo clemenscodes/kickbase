@@ -30,10 +30,7 @@
           system,
           ...
         }: let
-          inherit (nixpkgs) lib;
-          inherit ((lib.importTOML ./crates/server/Cargo.toml).package) name version;
-
-          pname = name;
+          inherit (pkgs) lib;
 
           assets = pkgs.stdenv.mkDerivation {
             inherit version;
@@ -68,63 +65,71 @@
 
           craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
+          src = craneLib.cleanCargoSource ./.;
+
+          inherit (craneLib.crateNameFromCargoToml {inherit src;}) pname version;
+
           args = {
-            inherit pname version;
-            src = nix-filter.lib {
-              root = ./crates/server/.;
-              include = [
-                "src"
-                "styles"
-                "templates"
-                "Cargo.toml"
-                "Cargo.lock"
-              ];
-            };
+            inherit src;
             strictDeps = true;
             buildInputs = with pkgs; [openssl];
             nativeBuildInputs = with pkgs; [pkg-config];
           };
 
-          mkCrate = platform: args: let
-            cargoArtifacts = craneLib.buildDepsOnly args;
-            crate = craneLib.buildPackage (args // {inherit cargoArtifacts;});
-          in {
-            "${platform}-crate" = crate;
-            "${platform}-clippy" = craneLib.cargoClippy (args // {inherit cargoArtifacts;});
-            "${platform}-coverage" = craneLib.cargoTarpaulin (args // {inherit cargoArtifacts;});
-            "${platform}-app" = pkgs.writeShellScriptBin pname ''
-              WEBSERVER_ASSETS=${assets}/assets ${crate}/bin/${pname}
-            '';
-          };
-
-          linux = mkCrate "linux" args;
-
-          windows =
-            mkCrate "windows" args
+          individualCrateArgs =
+            args
             // {
+              inherit cargoArtifacts version;
               doCheck = false;
-              CARGO_BUILD_TARGET = "x86_64-pc-windows-gnu";
-              TARGET_CC = "${pkgs.pkgsCross.mingwW64.stdenv.cc}/bin/${pkgs.pkgsCross.mingwW64.stdenv.cc.targetPrefix}cc";
-              OPENSSL_DIR = "${pkgs.openssl.dev}";
-              OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib";
-              OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include/";
-              depsBuildBuild = with pkgs; [
-                pkgsCross.mingwW64.stdenv.cc
-                pkgsCross.mingwW64.windows.pthreads
-              ];
             };
+
+          fileSetForCrate = crateFiles:
+            nix-filter.lib {
+              root = ./.;
+              include =
+                [
+                  ./Cargo.toml
+                  ./Cargo.lock
+                ]
+                ++ crateFiles;
+            };
+
+          cargoArtifacts = craneLib.buildDepsOnly args;
+
+          api = craneLib.buildPackage (individualCrateArgs
+            // rec {
+              pname = "api";
+              cargoExtraArgs = "-p ${pname}";
+              src = fileSetForCrate [
+                ./crates/api/src
+                ./crates/api/Cargo.toml
+              ];
+            });
+
+          server = craneLib.buildPackage (individualCrateArgs
+            // rec {
+              pname = "server";
+              cargoExtraArgs = "-p ${pname}";
+              src = fileSetForCrate [
+                ./crates/api
+                ./crates/server/src
+                ./crates/server/templates
+                ./crates/server/styles
+                ./crates/server/Cargo.toml
+              ];
+            });
+
+          app = pkgs.writeShellScriptBin pname ''
+            WEBSERVER_ASSETS=${assets}/assets ${server}/bin/server
+          '';
         in
           with pkgs; {
             formatter = alejandra;
             checks = {
-              inherit assets;
-              inherit (linux) linux-crate linux-clippy linux-coverage;
-              inherit (windows) windows-crate windows-clippy windows-coverage;
+              inherit api server assets;
             };
             packages = {
-              inherit assets;
-              inherit (linux) linux-crate linux-clippy linux-coverage;
-              inherit (windows) windows-crate windows-clippy windows-coverage;
+              inherit app api server assets;
               default = self.packages.${system}.kickbase;
             };
             apps = {
@@ -157,7 +162,7 @@
                 settings = {
                   processes = {
                     server = {
-                      command = "${self.packages.${system}.linux-crate}/bin/kickbase";
+                      command = "${self.packages.${system}.app}/bin/${pname}";
                     };
                   };
                 };
