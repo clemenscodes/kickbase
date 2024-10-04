@@ -57,7 +57,6 @@ COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
 COPY rust-toolchain.toml rust-toolchain.toml
 COPY crates/server/Cargo.toml crates/server/Cargo.toml
-COPY crates/server/Cargo.lock crates/server/Cargo.lock
 COPY --from=openssl /musl /musl
 
 ENV PKG_CONFIG_ALLOW_CROSS=1
