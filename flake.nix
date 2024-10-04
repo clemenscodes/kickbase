@@ -246,6 +246,10 @@
               ];
               RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
               RUST_BACKTRACE = 1;
+              shellHook = ''
+                moon sync projects
+                export MOON=$(pwd)
+              '';
             };
           };
 

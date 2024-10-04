@@ -9,73 +9,21 @@ tags:
 type: "application"
 language: "rust"
 platform: "rust"
-docker:
-  file:
-    buildTask: "build"
-    image: rust:1.80.1-slim-bullseye
-    startTask: "target/release/kickbase"
-  scaffold:
-    include:
-      - "templates/**/*"
-      - "assets/**/*"
-      - "styles/**/*"
-      - "tailwind.config.js"
 tasks:
-  dev:
-    command: "cargo watch -c -w src -w templates -w styles -- moon run start"
   styles:
     command: "bunx tailwindcss -i styles/tailwind.css -o assets/main.css"
     platform: "system"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-    outputs:
-      - "assets/main.css"
   build:
-    command: "cargo build"
     deps:
       - "styles"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-    outputs:
-      - "target/"
-  start:
-    local: true
-    command: "cargo run --release"
-    deps:
-      - "styles"
+    command: "cargo build -p server"
   release:
-    command: "cargo build --release"
     deps:
       - "styles"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-    outputs:
-      - "target/"
+    command: "cargo build -p server --release"
   test:
-    command: "cargo test"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-    outputs:
-      - "target/"
+    command: "cargo test -p server"
   format:
-    command: "cargo fmt"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
+    command: "cargo fmt -p server"
   lint:
-    command: "cargo clippy"
-    inputs:
-      - "@group(sources)"
-      - "@group(configs)"
-  lpi:
-    command: "lpi"
-    platform: "system"
-    options:
-      cache: false
-      runFromWorkspaceRoot: true
-    env:
-      MOON: "$workspaceRoot"
+    command: "cargo clippy -p server"

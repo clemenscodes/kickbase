@@ -65,11 +65,10 @@ ENV PKG_CONFIG_ALLOW_CROSS=1
 ENV OPENSSL_STATIC=true
 ENV OPENSSL_DIR=/musl
 
-RUN mkdir -p crates/kickbase/src crates/api/src crates/server/src && \
-  echo "id: ${APP}/app" > crates/kickbase/moon.yml && \
-  echo "project:" >> crates/kickbase/moon.yml && \
-  echo "  name: ${APP}/app" >> crates/kickbase/moon.yml && \
-  echo "  description: ${APP}" >> crates/kickbase/moon.yml && \
+RUN mkdir -p \
+  crates/kickbase/src \
+  crates/api/src \
+  crates/server/src && \
   touch crates/api/src/lib.rs && \
   touch crates/server/src/lib.rs && \
   echo "fn main() {println!(\"if you see this, the build broke\")}" > crates/kickbase/src/main.rs && \
