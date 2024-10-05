@@ -1,8 +1,8 @@
 [package]
 name = "server"
-version = "0.1.1"
-edition = "2021"
-license = "MIT"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [dependencies]
 api = { path = "../api" }
@@ -17,3 +17,4 @@ tokio.workspace = true
 tower.workspace = true
 tower-http.workspace = true
 tracing.workspace = true
+workspace = { version = "0.1", path = "../workspace" }

@@ -1,11 +1,12 @@
 [package]
 name = "kickbase"
-version = "0.1.1"
-edition = "2021"
-license = "MIT"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [dependencies]
 server = { path = "../server" }
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+workspace = { version = "0.1", path = "../workspace" }
