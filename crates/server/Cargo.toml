@@ -1,11 +1,11 @@
 [package]
 name = "server"
-version = "0.1.1"
-edition = "2021"
-license = "MIT"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [dependencies]
-api = { path = "../api" }
+api.workspace = true
 askama = "0.12.1"
 askama_axum = "0.4.0"
 axum.workspace = true
@@ -17,3 +17,4 @@ tokio.workspace = true
 tower.workspace = true
 tower-http.workspace = true
 tracing.workspace = true
+workspace = { version = "0.1", path = "../workspace" }

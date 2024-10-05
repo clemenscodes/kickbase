@@ -97,6 +97,7 @@
               ./rustfmt.toml
               ./rust-toolchain.toml
               ./deny.toml
+              ./.config
               ./crates
             ];
           };
@@ -124,6 +125,7 @@
                 [
                   ./Cargo.toml
                   ./Cargo.lock
+                  ./crates/workspace
                 ]
                 ++ crateFiles;
             };
@@ -214,6 +216,23 @@
               // {
                 inherit cargoArtifacts;
               });
+
+            hakari = craneLib.mkCargoDerivation {
+              inherit src;
+              pname = "workspace";
+              cargoArtifacts = null;
+              doInstallCargoArtifacts = false;
+
+              buildPhaseCargoCommand = ''
+                cargo hakari generate --diff
+                cargo hakari manage-deps --dry-run
+                cargo hakari verify
+              '';
+
+              nativeBuildInputs = [
+                pkgs.cargo-hakari
+              ];
+            };
           };
 
           packages = {
@@ -240,6 +259,10 @@
                 tailwindcss
                 bun
                 cargo-watch
+                cargo-audit
+                cargo-deny
+                cargo-llvm-cov
+                cargo-tarpaulin
                 cargo-nextest
                 cargo-hakari
                 taplo

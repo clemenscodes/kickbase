@@ -1,15 +1,20 @@
 [workspace]
 resolver = "2"
-members = ["crates/*"]
+members = ["crates/*", "crates/workspace"]
 
 [workspace.package]
 version = "0.1.1"
 edition = "2021"
+license = "MIT"
 
 [workspace.metadata.crane]
 name = "kickbase"
 
 [workspace.dependencies]
+api = { path = "./crates/api" }
+server = { path = "./crates/server" }
+kickbase = { path = "./crates/kickbase" }
+workspace = { path = "./crates/workspace" }
 tokio = { version = "1.39.3", features = ["full"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
