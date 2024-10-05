@@ -259,6 +259,10 @@
                 tailwindcss
                 bun
                 cargo-watch
+                cargo-audit
+                cargo-deny
+                cargo-llvm-cov
+                cargo-tarpaulin
                 cargo-nextest
                 cargo-hakari
                 taplo
