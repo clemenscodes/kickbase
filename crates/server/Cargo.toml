@@ -5,7 +5,7 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
-api = { path = "../api" }
+api.workspace = true
 askama = "0.12.1"
 askama_axum = "0.4.0"
 axum.workspace = true

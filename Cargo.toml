@@ -11,6 +11,10 @@ license = "MIT"
 name = "kickbase"
 
 [workspace.dependencies]
+api = { path = "./crates/api" }
+server = { path = "./crates/server" }
+kickbase = { path = "./crates/kickbase" }
+workspace = { path = "./crates/workspace" }
 tokio = { version = "1.39.3", features = ["full"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
