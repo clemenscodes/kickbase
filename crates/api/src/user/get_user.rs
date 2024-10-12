@@ -14,10 +14,15 @@ impl HttpClient {
     let response = self.get(Method::GET, "/user/me", None).await?;
     let user = response.value.get("user").unwrap();
     let leagues = self.get_leagues().await?;
+    let image = user
+      .get("profile")
+      .map(|value| value.to_string().replace("\"", ""))
+      .unwrap_or_default();
+
     let user = User {
       id: user.get("id").unwrap().to_string().replace("\"", ""),
       name: user.get("name").unwrap().to_string().replace("\"", ""),
-      image: user.get("profile").unwrap().to_string().replace("\"", ""),
+      image,
       leagues,
     };
 
@@ -32,6 +37,6 @@ mod tests {
   #[tokio::test]
   async fn test_get_user() {
     let response = KICKBASE.read().await.get_user().await;
-    println!("{response:#?}");
+    dbg!(&response);
   }
 }

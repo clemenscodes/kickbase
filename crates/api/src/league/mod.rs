@@ -34,7 +34,10 @@ impl HttpClient {
           .unwrap()
           .to_string()
           .replace("\"", "");
-        let image = league.get("ci").unwrap().to_string().replace("\"", "");
+        let image = league
+          .get("ci")
+          .map(|value| value.to_string().replace("\"", ""))
+          .unwrap_or_default();
         League {
           id,
           name,

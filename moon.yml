@@ -1,36 +1,43 @@
-# https://moonrepo.dev/docs/config/project
-$schema: "https://moonrepo.dev/schemas/project.json"
-id: "workspace"
-project:
-  name: "workspace"
-  description: "kickbase workspace"
-tags:
-  - "kickbase"
-type: "application"
-language: "rust"
-platform: "rust"
-tasks:
-  dev:
-    command: "noop"
-    deps:
-      - "kickbase/app:dev"
-      - "kickbase/api:dev"
-      - "kickbase/server:dev"
-      - "kickbase/server:ui"
-    local: true
-  build:
-    command: "cargo build --all-targets"
-  release:
-    command: "cargo build --all-targets --release"
-  test:
-    command: "cargo test --all-targets"
-  format:
-    command: "cargo fmt --all-targets"
-  lint:
-    command: "cargo clippy --all-targets -- --deny warnings"
-  docbuild:
-    command: "nix build .#kickbase-api-doc"
-  docs:
-    deps:
-      - "docbuild"
-    command: "$BROWSER result/share/index.html"
+  # https://moonrepo.dev/docs/config/project
+  $schema: "https://moonrepo.dev/schemas/project.json"
+  id: "workspace"
+  project:
+    name: "workspace"
+    description: "kickbase workspace"
+  tags:
+    - "kickbase"
+  type: "application"
+  language: "rust"
+  platform: "rust"
+  tasks:
+    dev:
+      command: "noop"
+      deps:
+        - "kickbase/app:dev"
+        - "kickbase/app:testwatch"
+        - "kickbase/api:dev"
+        - "kickbase/api:testwatch"
+        - "kickbase/server:dev"
+        - "kickbase/server:testwatch"
+        - "kickbase/server:ui"
+      local: true
+    build:
+      command: "cargo build --all-targets"
+    release:
+      command: "cargo build --all-targets --release"
+    test:
+      command: "cargo test --all-targets"
+    format:
+      command: "cargo fmt --all-targets"
+    lint:
+      command: "cargo clippy --all-targets -- --deny warnings"
+    docbuild:
+      command: "nix build .#kickbase-api-doc"
+    docs:
+      deps:
+        - "docbuild"
+      command: "$BROWSER result/share/index.html"
+    taplo:
+      command: "taplo fmt *.toml && taplo fmt crates/**/*.toml"
+      options:
+        cache: false

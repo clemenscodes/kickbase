@@ -12,7 +12,10 @@ use axum::http::HeaderMap;
 use reqwest::{cookie::Jar, Client, ClientBuilder, Method, StatusCode, Url};
 use serde::Serialize;
 use serde_json::{json, Value};
-use std::sync::{Arc, LazyLock};
+use std::{
+  collections::HashMap,
+  sync::{Arc, LazyLock},
+};
 use thiserror::Error;
 use tokio::sync::RwLock;
 use tracing::{debug, warn};
@@ -66,10 +69,10 @@ impl HttpClient {
       HttpClientError::UrlParse(err)
     })?;
 
-    let mut request = self.client.request(method, url);
+    let mut request = self.client.request(method.clone(), url.clone());
 
-    if let Some(headers) = headers {
-      request = request.headers(headers);
+    if let Some(headers) = &headers {
+      request = request.headers(headers.clone());
     }
 
     if let Some(payload) = payload {
@@ -86,8 +89,69 @@ impl HttpClient {
     let status = response.status();
 
     if status == StatusCode::FORBIDDEN {
-      warn!("Forbidden request, not logged in.");
-      return Err(HttpClientError::Forbidden);
+      dotenvy::dotenv().unwrap();
+
+      let email = std::env::var("KICKBASE_EMAIL").map_err(|_| {
+        HttpClientError::MissingEnvVar("KICKBASE_EMAIL".to_string())
+      })?;
+      let password = std::env::var("KICKBASE_PASSWORD").map_err(|_| {
+        HttpClientError::MissingEnvVar("KICKBASE_PASSWORD".to_string())
+      })?;
+
+      let mut login_payload = HashMap::new();
+      login_payload.insert("email", email);
+      login_payload.insert("password", password);
+
+      let login_url = self.base_url.join("/user/login").map_err(|err| {
+        warn!("Failed to construct URL: {err}");
+        HttpClientError::UrlParse(err)
+      })?;
+
+      let login_request = self
+        .client
+        .request(Method::POST, login_url)
+        .json(&login_payload);
+
+      let response = login_request.send().await.map_err(|err| {
+        warn!("Request failed: {err}");
+        HttpClientError::Reqwest(err)
+      })?;
+
+      let status = response.status();
+
+      if status == StatusCode::FORBIDDEN {
+        return Err(HttpClientError::Forbidden);
+      }
+
+      let mut request = self.client.request(method, url);
+
+      if let Some(headers) = headers {
+        request = request.headers(headers);
+      }
+
+      if let Some(payload) = payload {
+        request = request.json(payload);
+      }
+
+      let response = request.send().await.map_err(|err| {
+        warn!("Request failed: {err}");
+        HttpClientError::Reqwest(err)
+      })?;
+
+      let value = response
+        .json::<Value>()
+        .await
+        .map_err(|err| {
+          warn!("Failed to parse JSON: {err}");
+          err
+        })
+        .unwrap_or_else(|_| json!({}));
+
+      debug!("{value:#?}");
+
+      let response = HttpResponse { value, status };
+
+      return Ok(response);
     }
 
     let value = response
@@ -117,6 +181,12 @@ pub enum HttpClientError {
 
   #[error("Forbidden error: Access is denied (403)")]
   Forbidden,
+
+  #[error("Missing environment variable: {0}")]
+  MissingEnvVar(String),
+
+  #[error("Unexpected error")]
+  Unexpected,
 }
 
 #[cfg(test)]
@@ -127,6 +197,9 @@ mod tests {
   use reqwest::Method;
   use reqwest::StatusCode;
   use serde_json::json;
+
+  pub const TEST_USER_ID: &str = "3408447";
+  pub const TEST_LEAGUE_ID: &str = "6195342";
 
   #[test]
   fn test_httpclient_new_valid_url() {

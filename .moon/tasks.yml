@@ -49,8 +49,12 @@ tasks:
     command: "cargo build --release"
     options:
       cache: false
+  testwatch:
+    command: "cargo watch -- cargo nextest run --nocapture"
+    options:
+      cache: false
   test:
-    command: "cargo nextest run"
+    command: "cargo nextest run --nocapture"
     options:
       cache: false
   format:

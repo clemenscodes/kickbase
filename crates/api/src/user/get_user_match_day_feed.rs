@@ -15,8 +15,16 @@ impl HttpClient {
 
 #[cfg(test)]
 mod tests {
+  use crate::tests::{TEST_LEAGUE_ID, TEST_USER_ID};
+  use crate::KICKBASE;
+
   #[tokio::test]
   async fn test_get_user_match_day_feed() {
-    // Boilerplate test code for get_user_match_day_feed
+    let response = KICKBASE
+      .read()
+      .await
+      .get_user_match_day_feed(TEST_USER_ID, TEST_LEAGUE_ID)
+      .await;
+    dbg!(&response);
   }
 }
