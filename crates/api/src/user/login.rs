@@ -1,4 +1,4 @@
-use super::{HttpClient, HttpClientError, HttpResponse};
+use crate::{HttpClient, HttpClientError, HttpResponse};
 use reqwest::Method;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -15,7 +15,6 @@ impl HttpClient {
     payload: LoginPayload,
   ) -> Result<HttpResponse, HttpClientError> {
     let mut map = HashMap::new();
-
     map.insert("email", payload.email);
     map.insert("password", payload.password);
 
@@ -24,5 +23,13 @@ impl HttpClient {
       .await?;
 
     Ok(response)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  #[tokio::test]
+  async fn test_login() {
+    // Boilerplate test code for login
   }
 }

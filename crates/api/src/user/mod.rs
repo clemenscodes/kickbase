@@ -1,26 +1,6 @@
-use super::{league::League, HttpClient, HttpClientError};
-use reqwest::Method;
-
-#[derive(Debug)]
-pub struct User {
-  pub name: String,
-  pub id: String,
-  pub image: String,
-  pub leagues: Vec<League>,
-}
-
-impl HttpClient {
-  pub async fn get_user(&self) -> Result<User, HttpClientError> {
-    let response = self.get(Method::GET, "/user/me", None).await?;
-    let user = response.value.get("user").unwrap();
-    let leagues = self.get_leagues().await?;
-    let user = User {
-      id: user.get("id").unwrap().to_string().replace("\"", ""),
-      name: user.get("name").unwrap().to_string().replace("\"", ""),
-      image: user.get("profile").unwrap().to_string().replace("\"", ""),
-      leagues,
-    };
-
-    Ok(user)
-  }
-}
+pub mod get_user;
+pub mod get_user_match_day_feed;
+pub mod league_user_info;
+pub mod login;
+pub mod refresh_chat_token;
+pub mod reset_password;
