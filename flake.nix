@@ -38,9 +38,6 @@
     services-flake = {
       url = "github:juspay/services-flake";
     };
-    postmanerator = {
-      url = "github:clemenscodes/postmanerator";
-    };
   };
 
   outputs = inputs:
@@ -89,7 +86,18 @@
             overlays = [
               (import rust-overlay)
               (final: prev: {
-                postmanerator = inputs.postmanerator.packages.${system}.default;
+                postmanerator = prev.buildGoModule rec {
+                  pname = "postmanerator";
+                  version = "0.11.0";
+                  src = pkgs.fetchFromGitHub {
+                    owner = "aubm";
+                    repo = pname;
+                    rev = "v${version}";
+                    hash = "sha256-0oYzKKW7vO7kFiIYLqkkeqlvjcAa/cuydcs+OqOMf5U=";
+                  };
+                  vendorHash = "sha256-DH2T6+Yfa0+tZLYzUThBnWFi+Ahg7UD2wXTSEFq9mUc=";
+                  doCheck = false;
+                };
               })
             ];
           };

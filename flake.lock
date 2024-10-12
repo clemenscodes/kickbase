@@ -113,40 +113,6 @@
         "url": "https://github.com/NixOS/nixpkgs/archive/fb192fec7cc7a4c26d51779e9bab07ce6fa5597a.tar.gz"
       }
     },
-    "nixpkgs_2": {
-      "locked": {
-        "lastModified": 1728492678,
-        "narHash": "sha256-9UTxR8eukdg+XZeHgxW5hQA9fIKHsKCdOIUycTryeVw=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "5633bcff0c6162b9e4b5f1264264611e950c8ec7",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "postmanerator": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_2"
-      },
-      "locked": {
-        "lastModified": 1728730570,
-        "narHash": "sha256-2Z+4SvFwMPLW6sD070DKy5S3awmpV7EmZXxe9OCCX4Y=",
-        "owner": "clemenscodes",
-        "repo": "postmanerator",
-        "rev": "951448f5138f0fa88c850fac37e705fe08ac12a8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "clemenscodes",
-        "repo": "postmanerator",
-        "type": "github"
-      }
-    },
     "process-compose-flake": {
       "locked": {
         "lastModified": 1727723765,
@@ -170,7 +136,6 @@
         "flake-parts": "flake-parts",
         "nix-filter": "nix-filter",
         "nixpkgs": "nixpkgs",
-        "postmanerator": "postmanerator",
         "process-compose-flake": "process-compose-flake",
         "rust-overlay": "rust-overlay",
         "services-flake": "services-flake"
