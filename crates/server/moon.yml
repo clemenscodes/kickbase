@@ -11,7 +11,7 @@ language: "rust"
 platform: "rust"
 workspace:
   inheritedTasks:
-    exclude: ["dev", "build", "release"]
+    exclude: ["build", "release"]
 tasks:
   styles:
     command: "bunx tailwindcss -i styles/tailwind.css -o assets/main.css"
@@ -26,9 +26,5 @@ tasks:
     command: "cargo build --release"
   ui:
     command: "cargo watch -c -w templates -w styles -- bunx tailwindcss -i styles/tailwind.css -o assets/main.css"
-    platform: "system"
-    local: true
-  dev:
-    command: "cargo watch"
     platform: "system"
     local: true

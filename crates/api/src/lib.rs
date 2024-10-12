@@ -15,7 +15,7 @@ use serde_json::{json, Value};
 use std::sync::{Arc, LazyLock};
 use thiserror::Error;
 use tokio::sync::RwLock;
-use tracing::warn;
+use tracing::{debug, warn};
 
 const API: &str = "https://api.kickbase.com";
 
@@ -61,19 +61,35 @@ impl HttpClient {
     payload: Option<&T>,
     headers: Option<HeaderMap>,
   ) -> Result<HttpResponse, HttpClientError> {
-    let url = self.base_url.join(endpoint)?;
+    let url = self.base_url.join(endpoint).map_err(|err| {
+      warn!("Failed to construct URL: {err}");
+      HttpClientError::UrlParse(err)
+    })?;
+
     let mut request = self.client.request(method, url);
 
     if let Some(headers) = headers {
-      request = request.headers(headers)
+      request = request.headers(headers);
     }
 
     if let Some(payload) = payload {
       request = request.json(payload);
     }
 
-    let response = request.send().await.unwrap();
+    let response = request.send().await.map_err(|err| {
+      warn!("Request failed: {err}");
+      HttpClientError::Reqwest(err)
+    })?;
+
+    debug!("{response:#?}");
+
     let status = response.status();
+
+    if status == StatusCode::FORBIDDEN {
+      warn!("Forbidden request, not logged in.");
+      return Err(HttpClientError::Forbidden);
+    }
+
     let value = response
       .json::<Value>()
       .await
@@ -82,6 +98,8 @@ impl HttpClient {
         err
       })
       .unwrap_or_else(|_| json!({}));
+
+    debug!("{value:#?}");
 
     let response = HttpResponse { value, status };
 
@@ -92,10 +110,13 @@ impl HttpClient {
 #[derive(Error, Debug)]
 pub enum HttpClientError {
   #[error("HTTP client error: {0}")]
-  ReqwestError(#[from] reqwest::Error),
+  Reqwest(#[from] reqwest::Error),
 
   #[error("URL parsing error: {0}")]
-  UrlParseError(#[from] url::ParseError),
+  UrlParse(#[from] url::ParseError),
+
+  #[error("Forbidden error: Access is denied (403)")]
+  Forbidden,
 }
 
 #[cfg(test)]
