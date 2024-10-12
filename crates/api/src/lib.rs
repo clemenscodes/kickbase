@@ -1,5 +1,12 @@
-pub mod auth;
+pub mod achievements;
+pub mod chat;
+pub mod competition;
+pub mod gift;
 pub mod league;
+pub mod lineup;
+pub mod live;
+pub mod market;
+pub mod player;
 pub mod user;
 
 use axum::http::HeaderMap;
