@@ -38,6 +38,9 @@
     services-flake = {
       url = "github:juspay/services-flake";
     };
+    postmanerator = {
+      url = "github:clemenscodes/postmanerator";
+    };
   };
 
   outputs = inputs:
@@ -266,6 +269,7 @@
                 cargo-nextest
                 cargo-hakari
                 taplo
+                inputs.postmanerator.packages.${system}.default
               ];
               RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
               RUST_BACKTRACE = 1;
