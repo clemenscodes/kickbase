@@ -9,6 +9,9 @@ tags:
 type: "application"
 language: "rust"
 platform: "rust"
+workspace:
+  inheritedTasks:
+    exclude: ["dev", "build", "release"]
 tasks:
   styles:
     command: "bunx tailwindcss -i styles/tailwind.css -o assets/main.css"
@@ -16,14 +19,16 @@ tasks:
   build:
     deps:
       - "styles"
-    command: "cargo build -p server"
+    command: "cargo build"
   release:
     deps:
       - "styles"
-    command: "cargo build -p server --release"
-  test:
-    command: "cargo test -p server"
-  format:
-    command: "cargo fmt -p server"
-  lint:
-    command: "cargo clippy -p server"
+    command: "cargo build --release"
+  ui:
+    command: "cargo watch -c -w templates -w styles -- bunx tailwindcss -i styles/tailwind.css -o assets/main.css"
+    platform: "system"
+    local: true
+  dev:
+    command: "cargo watch"
+    platform: "system"
+    local: true

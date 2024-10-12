@@ -10,14 +10,3 @@ tags:
 type: "application"
 language: "rust"
 platform: "rust"
-tasks:
-  build:
-    command: "cargo build -p api"
-  release:
-    command: "cargo build -p api --release"
-  test:
-    command: "cargo test -p api"
-  format:
-    command: "cargo fmt -p api"
-  lint:
-    command: "cargo clippy -p api"

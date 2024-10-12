@@ -9,7 +9,7 @@ use serde_json::{json, Value};
 use std::sync::{Arc, LazyLock};
 use thiserror::Error;
 use tokio::sync::RwLock;
-use tracing::{debug, warn};
+use tracing::warn;
 
 const API: &str = "https://api.kickbase.com";
 
@@ -32,11 +32,9 @@ pub struct HttpResponse {
 
 impl HttpClient {
   pub fn new(base_url: &str) -> Result<Self, HttpClientError> {
-    let cookies = Arc::new(Jar::default());
-
-    let client = ClientBuilder::new().cookie_provider(cookies).build()?;
-
     let base_url = Url::parse(base_url)?;
+    let cookies = Arc::new(Jar::default());
+    let client = ClientBuilder::new().cookie_provider(cookies).build()?;
 
     Ok(Self { client, base_url })
   }
@@ -58,7 +56,6 @@ impl HttpClient {
     headers: Option<HeaderMap>,
   ) -> Result<HttpResponse, HttpClientError> {
     let url = self.base_url.join(endpoint)?;
-
     let mut request = self.client.request(method, url);
 
     if let Some(headers) = headers {
@@ -69,12 +66,8 @@ impl HttpClient {
       request = request.json(payload);
     }
 
-    debug!("{request:#?}");
-
     let response = request.send().await.unwrap();
-
     let status = response.status();
-
     let value = response
       .json::<Value>()
       .await
@@ -85,8 +78,6 @@ impl HttpClient {
       .unwrap_or_else(|_| json!({}));
 
     let response = HttpResponse { value, status };
-
-    debug!("{response:#?}");
 
     Ok(response)
   }
