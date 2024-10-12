@@ -10,14 +10,9 @@ tags:
 type: "application"
 language: "rust"
 platform: "rust"
+workspace:
+  inheritedTasks:
+    exclude: ["dev"]
 tasks:
-  build:
-    command: "cargo build -p kickbase"
-  release:
-    command: "cargo build -p kickbase --release"
-  test:
-    command: "cargo test -p kickbase"
-  format:
-    command: "cargo fmt -p kickbase"
-  lint:
-    command: "cargo clippy -p kickbase"
+  dev:
+    command: "cargo watch -w src -x run"

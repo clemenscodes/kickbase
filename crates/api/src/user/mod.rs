@@ -12,11 +12,8 @@ pub struct User {
 impl HttpClient {
   pub async fn get_user(&self) -> Result<User, HttpClientError> {
     let response = self.get(Method::GET, "/user/me", None).await?;
-
     let user = response.value.get("user").unwrap();
-
     let leagues = self.get_leagues().await?;
-
     let user = User {
       id: user.get("id").unwrap().to_string().replace("\"", ""),
       name: user.get("name").unwrap().to_string().replace("\"", ""),

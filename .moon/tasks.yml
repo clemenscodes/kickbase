@@ -36,3 +36,16 @@ tasks:
     platform: "system"
     options:
       cache: false
+  dev:
+    command: "cargo watch"
+    local: true
+  build:
+    command: "cargo build"
+  release:
+    command: "cargo build --release"
+  test:
+    command: "cargo test"
+  format:
+    command: "cargo fmt"
+  lint:
+    command: "cargo clippy"

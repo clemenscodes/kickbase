@@ -10,6 +10,14 @@ type: "application"
 language: "rust"
 platform: "rust"
 tasks:
+  dev:
+    command: "noop"
+    deps:
+      - "kickbase/app:dev"
+      - "kickbase/api:dev"
+      - "kickbase/server:dev"
+      - "kickbase/server:ui"
+    local: true
   build:
     command: "cargo build --all-targets"
   release:
