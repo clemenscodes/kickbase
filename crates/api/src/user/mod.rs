@@ -18,6 +18,12 @@ pub struct LoginPayload {
   pub password: String,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct ResetPasswordPayload {
+  pub password: String,
+  pub token: String,
+}
+
 impl HttpClient {
   pub async fn login(
     &self,
@@ -35,6 +41,22 @@ impl HttpClient {
     Ok(response)
   }
 
+  pub async fn reset_password(
+    &self,
+    payload: ResetPasswordPayload,
+  ) -> Result<HttpResponse, HttpClientError> {
+    let mut map = HashMap::new();
+
+    map.insert("password", payload.password);
+    map.insert("token", payload.token);
+
+    let response = self
+      .req(Method::POST, "/user/resetpassword", Some(&map), None)
+      .await?;
+
+    Ok(response)
+  }
+
   pub async fn get_user(&self) -> Result<User, HttpClientError> {
     let response = self.get(Method::GET, "/user/me", None).await?;
     let user = response.value.get("user").unwrap();
@@ -47,5 +69,33 @@ impl HttpClient {
     };
 
     Ok(user)
+  }
+
+  pub async fn league_user_info(
+    &self,
+    league_id: &str,
+  ) -> Result<HttpResponse, HttpClientError> {
+    let url = format!("/leagues/{}/me", league_id);
+    let response = self.get(Method::GET, &url, None).await?;
+    Ok(response)
+  }
+
+  pub async fn get_user_match_day_feed(
+    &self,
+    league_id: &str,
+    user_id: &str,
+  ) -> Result<HttpResponse, HttpClientError> {
+    let url = format!("/leagues/{}/users/{}/feed", league_id, user_id);
+    let response = self.get(Method::GET, &url, None).await?;
+    Ok(response)
+  }
+
+  pub async fn refresh_chat_token(
+    &self,
+  ) -> Result<HttpResponse, HttpClientError> {
+    let response = self
+      .get(Method::POST, "/user/refreshchattoken", None)
+      .await?;
+    Ok(response)
   }
 }

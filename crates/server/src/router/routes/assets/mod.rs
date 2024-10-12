@@ -5,13 +5,14 @@ use tracing::{debug, error};
 pub fn router() -> Router {
   let path = std::env::var("WEBSERVER_ASSETS").map_or_else(
     |_| {
-      debug!("WEBSERVER_ASSETS environment variable is not set. Using current directory as the fallback for assets.");
-      std::env::current_dir()
-        .map(|path| path.join("crates").join("server").join("assets"))
+      let fallback = std::env::current_dir()
+        .map(|path| path.join("..").join("server").join("assets"))
         .unwrap_or_else(|err| {
           error!("Failed to get current directory: {}", err);
           std::process::exit(1);
-        })
+        });
+      debug!("WEBSERVER_ASSETS environment variable is not set. Using {fallback:#?} as the fallback for assets.");
+      fallback
     },
     |path_str| {
       debug!("WEBSERVER_ASSETS environment variable found, using path: {}", path_str);
