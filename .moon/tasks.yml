@@ -44,7 +44,7 @@ tasks:
   release:
     command: "cargo build --release"
   test:
-    command: "cargo test"
+    command: "cargo nextest run"
   format:
     command: "cargo fmt"
   lint:

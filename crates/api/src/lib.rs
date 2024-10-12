@@ -1,5 +1,4 @@
 pub mod achievements;
-pub mod chat;
 pub mod competition;
 pub mod gift;
 pub mod league;
@@ -97,4 +96,133 @@ pub enum HttpClientError {
 
   #[error("URL parsing error: {0}")]
   UrlParseError(#[from] url::ParseError),
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use axum::http::HeaderMap;
+  use httpmock::MockServer;
+  use reqwest::Method;
+  use reqwest::StatusCode;
+  use serde_json::json;
+
+  #[test]
+  fn test_httpclient_new_valid_url() {
+    let client = HttpClient::new("http://localhost");
+    assert!(client.is_ok());
+  }
+
+  #[test]
+  fn test_httpclient_new_invalid_url() {
+    let client = HttpClient::new("invalid-url");
+    assert!(client.is_err());
+  }
+
+  #[tokio::test]
+  async fn test_httpclient_get_success() {
+    let server = MockServer::start();
+
+    let mock = server.mock(|when, then| {
+      when.method(httpmock::Method::GET).path("/test");
+      then
+        .status(200)
+        .header("content-type", "application/json")
+        .json_body(json!({"message": "success"}));
+    });
+
+    let client = HttpClient::new(&server.url("")).unwrap();
+    let result = client.get(Method::GET, "/test", None).await;
+
+    assert!(result.is_ok());
+    let response = result.unwrap();
+    assert_eq!(response.status, StatusCode::OK);
+    assert_eq!(response.value, json!({"message": "success"}));
+
+    mock.assert();
+  }
+
+  #[tokio::test]
+  async fn test_httpclient_get_error() {
+    let server = MockServer::start();
+
+    let mock = server.mock(|when, then| {
+      when.method(httpmock::Method::GET).path("/not-found");
+      then
+        .status(404)
+        .header("content-type", "application/json")
+        .json_body(json!({"error": "Not Found"}));
+    });
+
+    let client = HttpClient::new(&server.url("")).unwrap();
+    let result = client.get(Method::GET, "/not-found", None).await;
+
+    assert!(result.is_ok());
+    let response = result.unwrap();
+    assert_eq!(response.status, StatusCode::NOT_FOUND);
+    assert_eq!(response.value, json!({"error": "Not Found"}));
+
+    mock.assert();
+  }
+
+  #[tokio::test]
+  async fn test_httpclient_req_post_success() {
+    let server = MockServer::start();
+
+    let mock = server.mock(|when, then| {
+      when
+        .method(httpmock::Method::POST)
+        .path("/submit")
+        .json_body(json!({"name": "test"}));
+      then
+        .status(201)
+        .header("content-type", "application/json")
+        .json_body(json!({"message": "created"}));
+    });
+
+    let client = HttpClient::new(&server.url("")).unwrap();
+    let payload = json!({"name": "test"});
+    let result = client
+      .req(Method::POST, "/submit", Some(&payload), None)
+      .await;
+
+    assert!(result.is_ok());
+    let response = result.unwrap();
+    assert_eq!(response.status, StatusCode::CREATED);
+    assert_eq!(response.value, json!({"message": "created"}));
+
+    mock.assert();
+  }
+
+  #[tokio::test]
+  async fn test_httpclient_req_with_headers() {
+    let server = MockServer::start();
+
+    let mock = server.mock(|when, then| {
+      when
+        .method(httpmock::Method::GET)
+        .path("/headers")
+        .header("X-Custom-Header", "HeaderValue");
+      then
+        .status(200)
+        .header("content-type", "application/json")
+        .json_body(json!({"message": "header received"}));
+    });
+
+    let client = HttpClient::new(&server.url("")).unwrap();
+
+    let mut headers = HeaderMap::new();
+    headers.insert("X-Custom-Header", "HeaderValue".parse().unwrap());
+
+    let result = client
+      .req::<()>(Method::GET, "/headers", None, Some(headers))
+      .await;
+
+    assert!(result.is_ok());
+    let response = result.unwrap();
+    assert_eq!(response.status, StatusCode::OK);
+    assert_eq!(response.value, json!({"message": "header received"}));
+
+    mock.assert();
+  }
 }
