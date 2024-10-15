@@ -1,3 +1,6 @@
+pub mod get_lineup;
+pub mod get_lineup_extended;
+
 use super::{HttpClient, HttpClientError};
 use crate::HttpResponse;
 use reqwest::Method;
@@ -11,24 +14,6 @@ pub struct SetLineupPayload {
 }
 
 impl HttpClient {
-  pub async fn get_lineup(
-    &self,
-    league_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let url = format!("/leagues/{}/lineup", league_id);
-    let response = self.get(Method::GET, &url, None).await?;
-    Ok(response)
-  }
-
-  pub async fn get_lineup_extended(
-    &self,
-    league_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let url = format!("/leagues/{}/lineupex", league_id);
-    let response = self.get(Method::GET, &url, None).await?;
-    Ok(response)
-  }
-
   pub async fn ligainsider(
     &self,
     league_id: &str,
