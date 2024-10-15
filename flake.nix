@@ -38,6 +38,9 @@
     services-flake = {
       url = "github:juspay/services-flake";
     };
+    lpi = {
+      url = "github:cymenix/lpi";
+    };
   };
 
   outputs = inputs:
@@ -98,6 +101,9 @@
                   vendorHash = "sha256-DH2T6+Yfa0+tZLYzUThBnWFi+Ahg7UD2wXTSEFq9mUc=";
                   doCheck = false;
                 };
+              })
+              (final: prev: {
+                lpi = inputs.lpi.packages.${system}.default;
               })
             ];
           };
@@ -314,6 +320,7 @@
                 cargo-hakari
                 taplo
                 postmanerator
+                lpi
               ];
               RUST_SRC_PATH = "${craneLib.rustc}/lib/rustlib/src/rust/library";
               RUST_BACKTRACE = 1;
