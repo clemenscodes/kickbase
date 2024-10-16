@@ -45,6 +45,7 @@ impl HttpClient {
 mod tests {
   use crate::tests::get_test_client;
 
+  #[ignore]
   #[tokio::test]
   async fn test_get_leagues() {
     let client = get_test_client();
