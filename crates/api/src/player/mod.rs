@@ -2,6 +2,9 @@ use super::{HttpClient, HttpClientError};
 use crate::HttpResponse;
 use reqwest::Method;
 
+#[derive(Debug, Clone, Copy)]
+pub struct Player {}
+
 impl HttpClient {
   pub async fn get_player_info(
     &self,

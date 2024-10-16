@@ -1,6 +1,14 @@
-use super::{HttpClient, HttpClientError};
-use crate::HttpResponse;
+use super::{formation::Formation, HttpClient, HttpClientError};
+use crate::{player::Player, HttpResponse};
 use reqwest::Method;
+
+pub const PLAYERS: usize = 11;
+
+#[derive(Debug, Clone, Copy)]
+pub struct Lineup {
+  pub formation: Formation,
+  pub players: [Player; PLAYERS],
+}
 
 impl HttpClient {
   pub async fn get_lineup(

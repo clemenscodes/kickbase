@@ -1,3 +1,4 @@
+pub mod formation;
 pub mod get_lineup;
 pub mod get_lineup_extended;
 
