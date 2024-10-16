@@ -1,6 +1,7 @@
 use super::{formation::Formation, HttpClient, HttpClientError};
 use crate::{player::get_player_info::Player, HttpResponse};
 use reqwest::Method;
+use serde_json::Value;
 
 pub const PLAYERS: usize = 11;
 
@@ -14,9 +15,9 @@ impl HttpClient {
   pub async fn get_lineup(
     &self,
     league_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!("/leagues/{}/lineup", league_id);
-    let response = self.get(Method::GET, &url, None).await?;
+    let response = self.get(Method::GET, &url).await?;
     Ok(response)
   }
 }

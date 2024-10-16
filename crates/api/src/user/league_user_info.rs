@@ -1,13 +1,14 @@
 use crate::{HttpClient, HttpClientError, HttpResponse};
 use reqwest::Method;
+use serde_json::Value;
 
 impl HttpClient {
   pub async fn league_user_info(
     &self,
     league_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!("/leagues/{}/me", league_id);
-    let response = self.get(Method::GET, &url, None).await?;
+    let response = self.get::<Value>(Method::GET, &url).await?;
     Ok(response)
   }
 }

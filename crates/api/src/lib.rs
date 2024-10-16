@@ -8,7 +8,6 @@ pub mod market;
 pub mod player;
 pub mod user;
 
-use axum::http::HeaderMap;
 use reqwest::{cookie::Jar, Client, ClientBuilder, Method, StatusCode, Url};
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -34,8 +33,8 @@ pub struct HttpClient {
 }
 
 #[derive(Debug)]
-pub struct HttpResponse {
-  pub value: Value,
+pub struct HttpResponse<T: From<Value>> {
+  pub value: T,
   pub status: StatusCode,
 }
 
@@ -48,22 +47,20 @@ impl HttpClient {
     Ok(Self { client, base_url })
   }
 
-  pub async fn get(
+  pub async fn get<T: From<Value>>(
     &self,
     method: Method,
     endpoint: &str,
-    headers: Option<HeaderMap>,
-  ) -> Result<HttpResponse, HttpClientError> {
-    self.req(method, endpoint, Some(&json!({})), headers).await
+  ) -> Result<HttpResponse<T>, HttpClientError> {
+    self.req(method, endpoint, &json!({})).await
   }
 
-  pub async fn req<T: Serialize>(
+  pub async fn req<T: Serialize, K: From<Value>>(
     &self,
     method: Method,
     endpoint: &str,
-    payload: Option<&T>,
-    headers: Option<HeaderMap>,
-  ) -> Result<HttpResponse, HttpClientError> {
+    payload: &T,
+  ) -> Result<HttpResponse<K>, HttpClientError> {
     let url = self.base_url.join(endpoint).map_err(|err| {
       warn!("Failed to construct URL: {err}");
       HttpClientError::UrlParse(err)
@@ -71,13 +68,7 @@ impl HttpClient {
 
     let mut request = self.client.request(method.clone(), url.clone());
 
-    if let Some(headers) = &headers {
-      request = request.headers(headers.clone());
-    }
-
-    if let Some(payload) = payload {
-      request = request.json(payload);
-    }
+    request = request.json(payload);
 
     let response = request.send().await.map_err(|err| {
       warn!("Request failed: {err}");
@@ -125,13 +116,7 @@ impl HttpClient {
 
       let mut request = self.client.request(method, url);
 
-      if let Some(headers) = headers {
-        request = request.headers(headers);
-      }
-
-      if let Some(payload) = payload {
-        request = request.json(payload);
-      }
+      request = request.json(payload);
 
       let response = request.send().await.map_err(|err| {
         warn!("Request failed: {err}");
@@ -149,6 +134,8 @@ impl HttpClient {
 
       debug!("{value:#?}");
 
+      let value: K = value.into();
+
       let response = HttpResponse { value, status };
 
       return Ok(response);
@@ -164,6 +151,8 @@ impl HttpClient {
       .unwrap_or_else(|_| json!({}));
 
     debug!("{value:#?}");
+
+    let value: K = value.into();
 
     let response = HttpResponse { value, status };
 
@@ -192,7 +181,6 @@ pub enum HttpClientError {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use axum::http::HeaderMap;
   use httpmock::MockServer;
   use reqwest::Method;
   use reqwest::StatusCode;
@@ -231,7 +219,7 @@ mod tests {
     });
 
     let client = HttpClient::new(&server.url("")).unwrap();
-    let result = client.get(Method::GET, "/test", None).await;
+    let result = client.get::<Value>(Method::GET, "/test").await;
 
     assert!(result.is_ok());
     let response = result.unwrap();
@@ -254,7 +242,7 @@ mod tests {
     });
 
     let client = HttpClient::new(&server.url("")).unwrap();
-    let result = client.get(Method::GET, "/not-found", None).await;
+    let result = client.get::<Value>(Method::GET, "/not-found").await;
 
     assert!(result.is_ok());
     let response = result.unwrap();
@@ -282,45 +270,13 @@ mod tests {
     let client = HttpClient::new(&server.url("")).unwrap();
     let payload = json!({"name": "test"});
     let result = client
-      .req(Method::POST, "/submit", Some(&payload), None)
+      .req::<_, Value>(Method::POST, "/submit", &payload)
       .await;
 
     assert!(result.is_ok());
     let response = result.unwrap();
     assert_eq!(response.status, StatusCode::CREATED);
     assert_eq!(response.value, json!({"message": "created"}));
-
-    mock.assert();
-  }
-
-  #[tokio::test]
-  async fn test_httpclient_req_with_headers() {
-    let server = MockServer::start();
-
-    let mock = server.mock(|when, then| {
-      when
-        .method(httpmock::Method::GET)
-        .path("/headers")
-        .header("X-Custom-Header", "HeaderValue");
-      then
-        .status(200)
-        .header("content-type", "application/json")
-        .json_body(json!({"message": "header received"}));
-    });
-
-    let client = HttpClient::new(&server.url("")).unwrap();
-
-    let mut headers = HeaderMap::new();
-    headers.insert("X-Custom-Header", "HeaderValue".parse().unwrap());
-
-    let result = client
-      .req::<()>(Method::GET, "/headers", None, Some(headers))
-      .await;
-
-    assert!(result.is_ok());
-    let response = result.unwrap();
-    assert_eq!(response.status, StatusCode::OK);
-    assert_eq!(response.value, json!({"message": "header received"}));
 
     mock.assert();
   }

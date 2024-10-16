@@ -124,9 +124,9 @@ impl HttpClient {
     &self,
     league_id: &str,
     player_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!("/leagues/{}/players/{}", league_id, player_id);
-    let response = self.get(Method::GET, &url, None).await?;
+    let response: HttpResponse<Value> = self.get(Method::GET, &url).await?;
     Ok(response)
   }
 }

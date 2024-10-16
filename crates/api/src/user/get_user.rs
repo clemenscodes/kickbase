@@ -46,11 +46,10 @@ impl From<Value> for User {
 
 impl HttpClient {
   pub async fn get_user(&self) -> Result<User, HttpClientError> {
-    let response = self.get(Method::GET, "/user/me", None).await?;
-    let mut user: User = response.value.into();
+    let mut response = self.get::<User>(Method::GET, "/user/me").await?;
     let leagues = self.get_leagues().await?;
-    user.leagues = leagues;
-    Ok(user)
+    response.value.leagues = leagues;
+    Ok(response.value)
   }
 }
 

@@ -50,7 +50,7 @@ impl From<&Value> for League {
 
 impl HttpClient {
   pub async fn get_leagues(&self) -> Result<Vec<League>, HttpClientError> {
-    let response = self.get(Method::GET, "/leagues", None).await?;
+    let response = self.get::<Value>(Method::GET, "/leagues").await?;
     let leagues = response
       .value
       .get("leagues")

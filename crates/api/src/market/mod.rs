@@ -2,6 +2,7 @@ use super::{HttpClient, HttpClientError};
 use crate::HttpResponse;
 use reqwest::Method;
 use serde::Deserialize;
+use serde_json::Value;
 use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
@@ -20,18 +21,18 @@ impl HttpClient {
     &self,
     league_id: &str,
     player_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!("/leagues/{}/market/{}", league_id, player_id);
-    let response = self.get(Method::DELETE, &url, None).await?;
+    let response = self.get(Method::DELETE, &url).await?;
     Ok(response)
   }
 
   pub async fn get_market(
     &self,
     league_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!("/leagues/{}/market", league_id);
-    let response = self.get(Method::GET, &url, None).await?;
+    let response = self.get(Method::GET, &url).await?;
     Ok(response)
   }
 
@@ -39,13 +40,13 @@ impl HttpClient {
     &self,
     league_id: &str,
     payload: AddPlayerToMarketPayload,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let mut map = HashMap::new();
     map.insert("playerId", payload.player_id);
     map.insert("price", payload.price.to_string());
 
     let url = format!("/leagues/{}/market", league_id);
-    let response = self.req(Method::POST, &url, Some(&map), None).await?;
+    let response = self.req(Method::POST, &url, &map).await?;
     Ok(response)
   }
 
@@ -54,12 +55,12 @@ impl HttpClient {
     league_id: &str,
     player_id: &str,
     offer_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!(
       "/leagues/{}/market/{}/offers/{}/accept",
       league_id, player_id, offer_id
     );
-    let response = self.get(Method::POST, &url, None).await?;
+    let response = self.get(Method::POST, &url).await?;
     Ok(response)
   }
 
@@ -68,12 +69,12 @@ impl HttpClient {
     league_id: &str,
     player_id: &str,
     payload: UpdatePricePayload,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let mut map = HashMap::new();
     map.insert("price", payload.price.to_string());
 
     let url = format!("/leagues/{}/market/{}", league_id, player_id);
-    let response = self.req(Method::PUT, &url, Some(&map), None).await?;
+    let response = self.req(Method::PUT, &url, &map).await?;
     Ok(response)
   }
 
@@ -82,12 +83,12 @@ impl HttpClient {
     league_id: &str,
     player_id: &str,
     offer_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!(
       "/leagues/{}/market/{}/offers/{}/decline",
       league_id, player_id, offer_id
     );
-    let response = self.get(Method::POST, &url, None).await?;
+    let response = self.get(Method::POST, &url).await?;
     Ok(response)
   }
 
@@ -96,12 +97,12 @@ impl HttpClient {
     league_id: &str,
     player_id: &str,
     price: u64,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let mut map = HashMap::new();
-    map.insert("price", price.to_string());
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
+    let mut payload = HashMap::new();
+    payload.insert("price", price.to_string());
 
     let url = format!("/leagues/{}/market/{}/offers", league_id, player_id);
-    let response = self.req(Method::POST, &url, Some(&map), None).await?;
+    let response = self.req(Method::POST, &url, &payload).await?;
     Ok(response)
   }
 
@@ -110,12 +111,12 @@ impl HttpClient {
     league_id: &str,
     player_id: &str,
     offer_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!(
       "/leagues/{}/market/{}/offers/{}",
       league_id, player_id, offer_id
     );
-    let response = self.get(Method::DELETE, &url, None).await?;
+    let response = self.get(Method::DELETE, &url).await?;
     Ok(response)
   }
 }
