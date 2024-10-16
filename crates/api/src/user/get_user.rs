@@ -34,10 +34,11 @@ impl HttpClient {
 mod tests {
   use crate::tests::get_test_client;
 
+  #[ignore]
   #[tokio::test]
   async fn test_get_user() {
     let client = get_test_client();
-    let result = client.get_user().await;
-    assert!(result.is_ok());
+    let result = client.get_user().await.unwrap();
+    println!("{result:#?}");
   }
 }

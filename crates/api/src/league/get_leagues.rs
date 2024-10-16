@@ -48,7 +48,7 @@ mod tests {
   #[tokio::test]
   async fn test_get_leagues() {
     let client = get_test_client();
-    let result = client.get_leagues().await;
-    assert!(result.is_ok())
+    let result = client.get_leagues().await.unwrap();
+    println!("{result:#?}");
   }
 }

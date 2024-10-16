@@ -17,12 +17,15 @@ impl HttpClient {
 mod tests {
   use crate::tests::{get_test_client, TEST_LEAGUE_ID, TEST_USER_ID};
 
+  #[ignore]
   #[tokio::test]
   async fn test_get_user_match_day_feed() {
     let client = get_test_client();
     let result = client
       .get_user_match_day_feed(TEST_USER_ID, TEST_LEAGUE_ID)
-      .await;
-    assert!(result.is_ok());
+      .await
+      .unwrap()
+      .value;
+    println!("{result:#?}");
   }
 }

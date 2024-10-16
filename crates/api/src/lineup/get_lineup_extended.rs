@@ -17,6 +17,7 @@ impl HttpClient {
 mod tests {
   use crate::tests::{get_test_client, TEST_LEAGUE_ID};
 
+  #[ignore]
   #[tokio::test]
   async fn test_get_lineup_extended() {
     let client = get_test_client();

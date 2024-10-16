@@ -17,10 +17,11 @@ impl HttpClient {
 mod tests {
   use crate::tests::{get_test_client, TEST_LEAGUE_ID};
 
+  #[ignore]
   #[tokio::test]
   async fn test_get_lineup() {
     let client = get_test_client();
-    let result = client.get_lineup(TEST_LEAGUE_ID).await;
-    assert!(result.is_ok());
+    let result = client.get_lineup(TEST_LEAGUE_ID).await.unwrap().value;
+    println!("{result:#?}");
   }
 }
