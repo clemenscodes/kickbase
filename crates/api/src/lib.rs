@@ -201,6 +201,10 @@ mod tests {
   pub const TEST_USER_ID: &str = "3408447";
   pub const TEST_LEAGUE_ID: &str = "6195342";
 
+  pub fn get_test_client() -> HttpClient {
+    HttpClient::new(API).unwrap()
+  }
+
   #[test]
   fn test_httpclient_new_valid_url() {
     let client = HttpClient::new("http://localhost");

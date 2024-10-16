@@ -29,7 +29,5 @@ impl HttpClient {
 #[cfg(test)]
 mod tests {
   #[tokio::test]
-  async fn test_login() {
-    // Boilerplate test code for login
-  }
+  async fn test_login() {}
 }

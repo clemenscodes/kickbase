@@ -14,12 +14,12 @@ impl HttpClient {
 
 #[cfg(test)]
 mod tests {
-  use crate::tests::TEST_LEAGUE_ID;
-  use crate::KICKBASE;
+  use crate::tests::{get_test_client, TEST_LEAGUE_ID};
 
   #[tokio::test]
   async fn test_league_user_info() {
-    let response = KICKBASE.read().await.league_user_info(TEST_LEAGUE_ID).await;
-    dbg!(&response);
+    let client = get_test_client();
+    let result = client.league_user_info(TEST_LEAGUE_ID).await;
+    assert!(result.is_ok());
   }
 }
