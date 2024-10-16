@@ -1,10 +1,10 @@
 use super::{formation::Formation, HttpClient, HttpClientError};
-use crate::{player::Player, HttpResponse};
+use crate::{player::get_player_info::Player, HttpResponse};
 use reqwest::Method;
 
 pub const PLAYERS: usize = 11;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Lineup {
   pub formation: Formation,
   pub players: [Player; PLAYERS],

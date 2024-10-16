@@ -1,5 +1,6 @@
 use crate::{league::League, HttpClient, HttpClientError};
 use reqwest::Method;
+use serde_json::Value;
 
 #[derive(Debug)]
 pub struct User {
@@ -9,23 +10,46 @@ pub struct User {
   pub leagues: Vec<League>,
 }
 
+impl From<Value> for User {
+  fn from(value: Value) -> Self {
+    let user = value.get("user").unwrap();
+
+    let id = user
+      .get("id")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let name = user
+      .get("name")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let image = user
+      .get("profile")
+      .map(|v| v.as_str().unwrap_or_default().to_string())
+      .unwrap_or_default();
+
+    let leagues = vec![];
+
+    Self {
+      id,
+      name,
+      image,
+      leagues,
+    }
+  }
+}
+
 impl HttpClient {
   pub async fn get_user(&self) -> Result<User, HttpClientError> {
     let response = self.get(Method::GET, "/user/me", None).await?;
-    let user = response.value.get("user").unwrap();
+    let mut user: User = response.value.into();
     let leagues = self.get_leagues().await?;
-    let image = user
-      .get("profile")
-      .map(|value| value.to_string().replace("\"", ""))
-      .unwrap_or_default();
-
-    let user = User {
-      id: user.get("id").unwrap().to_string().replace("\"", ""),
-      name: user.get("name").unwrap().to_string().replace("\"", ""),
-      image,
-      leagues,
-    };
-
+    user.leagues = leagues;
     Ok(user)
   }
 }
