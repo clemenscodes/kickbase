@@ -15,7 +15,5 @@ impl HttpClient {
 #[cfg(test)]
 mod tests {
   #[tokio::test]
-  async fn test_refresh_chat_token() {
-    // Boilerplate test code for refresh_chat_token
-  }
+  async fn test_refresh_chat_token() {}
 }

@@ -1,3 +1,5 @@
+pub mod get_leagues;
+
 use std::collections::HashMap;
 
 use super::{HttpClient, HttpClientError};
@@ -14,43 +16,6 @@ pub struct League {
 }
 
 impl HttpClient {
-  pub async fn get_leagues(&self) -> Result<Vec<League>, HttpClientError> {
-    let response = self.get(Method::GET, "/leagues", None).await.unwrap();
-
-    let leagues: Vec<League> = response
-      .value
-      .get("leagues")
-      .unwrap()
-      .as_array()
-      .unwrap()
-      .iter()
-      .map(|league| {
-        let name = league.get("name").unwrap().to_string().replace("\"", "");
-        let id = league.get("id").unwrap().to_string().replace("\"", "");
-        let creator =
-          league.get("creator").unwrap().to_string().replace("\"", "");
-        let creation = league
-          .get("creation")
-          .unwrap()
-          .to_string()
-          .replace("\"", "");
-        let image = league
-          .get("ci")
-          .map(|value| value.to_string().replace("\"", ""))
-          .unwrap_or_default();
-        League {
-          id,
-          name,
-          creator,
-          creation,
-          image,
-        }
-      })
-      .collect();
-
-    Ok(leagues)
-  }
-
   pub async fn get_feed_comments(
     &self,
     league_id: &str,

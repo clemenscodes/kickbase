@@ -29,7 +29,5 @@ impl HttpClient {
 #[cfg(test)]
 mod tests {
   #[tokio::test]
-  async fn test_reset_password() {
-    // Boilerplate test code for reset_password
-  }
+  async fn test_reset_password() {}
 }

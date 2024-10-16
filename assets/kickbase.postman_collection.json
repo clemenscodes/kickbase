@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "d8b4030a-c12e-4744-b6bb-8243dd880cc6",
-		"name": "Kickbase",
+		"_postman_id": "5fa240b2-04ce-49e8-9835-3dd20880248f",
+		"name": "kickbase",
 		"description": "This API was published as part of [kickbase-api-doc](https://github.com/kevinskyba/kickbase-api-doc) on GitHub. It is licensed under the [MIT License](https://github.com/kevinskyba/kickbase-api-doc/blob/master/LICENSE). The purpose of this documentation is for scientific reasons only!",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13471666"
 	},
 	"item": [
 		{
@@ -15,12 +16,14 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "44e41178-a962-4fab-9861-ebff632627eb",
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);\r",
-									"postman.setEnvironmentVariable(\"token\", jsonData.token);"
+									"postman.setEnvironmentVariable(\"token\", jsonData.token);\r",
+									"postman.setEnvironmentVariable(\"user_id\", jsonData.user.id);\r",
+									"postman.setEnvironmentVariable(\"league_id\", jsonData.leagues[0].id);"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -43,7 +46,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"ext\": false\r\n}"
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\"\r\n}"
 						},
 						"url": {
 							"raw": "{{api_url}}/user/login",
@@ -53,6 +56,99 @@
 							"path": [
 								"user",
 								"login"
+							]
+						},
+						"description": "Logs in a user by email and password and saves the password as an environment variable."
+					},
+					"response": []
+				},
+				{
+					"name": "Me",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url}}/user/me",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"user",
+								"me"
+							]
+						},
+						"description": "Logs in a user by email and password and saves the password as an environment variable."
+					},
+					"response": []
+				},
+				{
+					"name": "Settings",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"ext\": false\r\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/user/settings",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"user",
+								"settings"
 							]
 						},
 						"description": "Logs in a user by email and password and saves the password as an environment variable."
@@ -143,18 +239,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -179,7 +275,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a50380cc-a17f-452c-b0cc-cb73aedfe247",
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);\r",
 									"postman.setEnvironmentVariable(\"chat_token\", jsonData.token);"
@@ -196,18 +291,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -223,8 +318,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Player",
@@ -239,18 +333,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -279,18 +373,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -319,18 +413,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -357,18 +451,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -397,18 +491,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -430,8 +524,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Market",
@@ -446,18 +539,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -485,18 +578,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -524,18 +617,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -571,18 +664,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -613,18 +706,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -661,18 +754,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -712,18 +805,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -761,18 +854,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -793,8 +886,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Lineup",
@@ -809,18 +901,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -847,18 +939,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -885,18 +977,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -928,18 +1020,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -960,8 +1052,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Live Match Day",
@@ -976,18 +1067,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1021,18 +1112,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1060,18 +1151,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1100,18 +1191,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1139,18 +1230,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1179,18 +1270,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1216,18 +1307,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1255,18 +1346,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1292,18 +1383,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1325,8 +1416,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "League",
@@ -1341,18 +1431,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1378,18 +1468,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1418,18 +1508,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1462,18 +1552,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1491,6 +1581,44 @@
 					"response": []
 				},
 				{
+					"name": "Live",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "kkstrauth={{token}};",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/leagues/{{league_id}}/live",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"live"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Players For Match Day",
 					"request": {
 						"auth": {
@@ -1500,18 +1628,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1546,18 +1674,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1584,18 +1712,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1622,18 +1750,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1653,6 +1781,46 @@
 					"response": []
 				},
 				{
+					"name": "User Lineup",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "kkstrauth={{token}};",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/leagues/{{league_id}}/users/{{user_id}}/lineup",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"users",
+								"{{user_id}}",
+								"lineup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "User Stats",
 					"request": {
 						"auth": {
@@ -1662,18 +1830,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1702,18 +1870,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1742,18 +1910,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1780,18 +1948,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1818,18 +1986,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1862,18 +2030,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1894,8 +2062,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Competition",
@@ -1910,18 +2077,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1948,18 +2115,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -1986,13 +2153,13 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -2039,7 +2206,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{api_url}}/competition/matches?matchDay=20",
+							"raw": "{{api_url}}/competition/matches?matchDay=2",
 							"host": [
 								"{{api_url}}"
 							],
@@ -2050,7 +2217,7 @@
 							"query": [
 								{
 									"key": "matchDay",
-									"value": "20"
+									"value": "2"
 								}
 							]
 						}
@@ -2067,22 +2234,22 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
-							"raw": "{{api_url}}/competition/table?matchDay=30",
+							"raw": "{{api_url}}/competition/table?matchDay=1",
 							"host": [
 								"{{api_url}}"
 							],
@@ -2093,7 +2260,7 @@
 							"query": [
 								{
 									"key": "matchDay",
-									"value": "30"
+									"value": "1"
 								}
 							]
 						}
@@ -2110,18 +2277,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -2149,18 +2316,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -2182,8 +2349,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Gift",
@@ -2198,18 +2364,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -2236,18 +2402,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -2264,8 +2430,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Achievements",
@@ -2280,18 +2445,18 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							},
 							{
 								"key": "Cookie",
-								"type": "text",
-								"value": "kkstrauth={{token}};"
+								"value": "kkstrauth={{token}};",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -2313,8 +2478,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Chat",
@@ -2325,7 +2489,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5cb2010f-5aff-4944-bbf1-ae2b41d282d0",
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);\r",
 									"postman.setEnvironmentVariable(\"firebase_id_token\", jsonData.idToken);"
@@ -2447,15 +2610,333 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
+		},
+		{
+			"name": "v2",
+			"item": [
+				{
+					"name": "Leagues Selection",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v2}}/leagues/selection",
+							"host": [
+								"{{api_url_v2}}"
+							],
+							"path": [
+								"leagues",
+								"selection"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "League Stats",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v2}}/leagues/{{league_id}}/stats",
+							"host": [
+								"{{api_url_v2}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"stats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "League Manager Squad",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v2}}/leagues/{{league_id}}/manager/squad",
+							"host": [
+								"{{api_url_v2}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"manager",
+								"squad"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "League Livetable",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v2}}/leagues/{{league_id}}/livetable",
+							"host": [
+								"{{api_url_v2}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"livetable"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "League Basecards",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v2}}/leagues/{{league_id}}/basecards",
+							"host": [
+								"{{api_url_v2}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"basecards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "League Feed",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v2}}/leagues/{{league_id}}/feed?filter=1,3,5,13,15,16,17,18,20,21&start=0",
+							"host": [
+								"{{api_url_v2}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"feed"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "1,3,5,13,15,16,17,18,20,21"
+								},
+								{
+									"key": "start",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v2}}/notifications?leagueId={{league_id}}",
+							"host": [
+								"{{api_url_v2}}"
+							],
+							"path": [
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "leagueId",
+									"value": "{{league_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "v3",
+			"item": [
+				{
+					"name": "League Overview",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v3}}/leagues/{{league_id}}/overview",
+							"host": [
+								"{{api_url_v3}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"overview"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "League Scouted Players",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v3}}/leagues/{{league_id}}/scoutedplayers",
+							"host": [
+								"{{api_url_v3}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"scoutedplayers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "League Table",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url_v3}}/leagues/{{league_id}}/table?matchDay=1",
+							"host": [
+								"{{api_url_v3}}"
+							],
+							"path": [
+								"leagues",
+								"{{league_id}}",
+								"table"
+							],
+							"query": [
+								{
+									"key": "matchDay",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "aab95ad4-9e09-457a-984d-ac646fdfc10c",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -2465,13 +2946,11 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "1dc00f1c-1de0-47cc-ab59-42564d58ea4f",
 				"type": "text/javascript",
 				"exec": [
 					""
 				]
 			}
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

@@ -33,10 +33,14 @@
       command: "cargo clippy --all-targets -- --deny warnings"
     docbuild:
       command: "nix build .#kickbase-api-doc"
+      options:
+        cache: false
     docs:
       deps:
         - "docbuild"
       command: "$BROWSER result/share/index.html"
+      options:
+        cache: false
     taplo:
       command: "taplo fmt *.toml && taplo fmt crates/**/*.toml"
       options:

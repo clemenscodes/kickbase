@@ -32,11 +32,13 @@ impl HttpClient {
 
 #[cfg(test)]
 mod tests {
-  use crate::KICKBASE;
+  use crate::tests::get_test_client;
 
+  #[ignore]
   #[tokio::test]
   async fn test_get_user() {
-    let response = KICKBASE.read().await.get_user().await;
-    dbg!(&response);
+    let client = get_test_client();
+    let result = client.get_user().await.unwrap();
+    println!("{result:#?}");
   }
 }

@@ -50,11 +50,11 @@ tasks:
     options:
       cache: false
   testwatch:
-    command: "cargo watch -- cargo nextest run --nocapture"
+    command: "cargo watch -- cargo nextest run"
     options:
       cache: false
   test:
-    command: "cargo nextest run --nocapture"
+    command: "cargo nextest run"
     options:
       cache: false
   format:

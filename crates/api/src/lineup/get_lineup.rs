@@ -1,12 +1,13 @@
-use crate::{HttpClient, HttpClientError, HttpResponse};
+use super::{HttpClient, HttpClientError};
+use crate::HttpResponse;
 use reqwest::Method;
 
 impl HttpClient {
-  pub async fn league_user_info(
+  pub async fn get_lineup(
     &self,
     league_id: &str,
   ) -> Result<HttpResponse, HttpClientError> {
-    let url = format!("/leagues/{}/me", league_id);
+    let url = format!("/leagues/{}/lineup", league_id);
     let response = self.get(Method::GET, &url, None).await?;
     Ok(response)
   }
@@ -18,9 +19,9 @@ mod tests {
 
   #[ignore]
   #[tokio::test]
-  async fn test_league_user_info() {
+  async fn test_get_lineup() {
     let client = get_test_client();
-    let result = client.league_user_info(TEST_LEAGUE_ID).await.unwrap().value;
+    let result = client.get_lineup(TEST_LEAGUE_ID).await.unwrap().value;
     println!("{result:#?}");
   }
 }
