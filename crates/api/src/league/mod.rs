@@ -1,5 +1,12 @@
 pub mod comment_league;
+pub mod get_feed;
+pub mod get_feed_comments;
+pub mod get_info;
 pub mod get_leagues;
+pub mod get_players_for_match_day;
+pub mod get_stats;
+pub mod get_user_profile;
+pub mod get_users;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -64,76 +71,6 @@ impl From<&Value> for League {
 }
 
 impl HttpClient {
-  pub async fn get_feed_comments(
-    &self,
-    league_id: &str,
-    feed_item_id: &str,
-  ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{league_id}/feed/{feed_item_id}/comments");
-    let response = self.get(&url).await?;
-    Ok(response)
-  }
-
-  pub async fn get_feed(
-    &self,
-    league_id: &str,
-    start: u64,
-  ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{league_id}/feed?start={start}");
-    let response = self.get(&url).await?;
-    Ok(response)
-  }
-
-  pub async fn get_info(
-    &self,
-    league_id: &str,
-  ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{league_id}/info");
-    let response = self.get(&url).await?;
-    Ok(response)
-  }
-
-  pub async fn get_players_for_match_day(
-    &self,
-    league_id: &str,
-    user_id: &str,
-    match_day: u64,
-  ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!(
-      "/leagues/{league_id}/users/{user_id}/players?matchDay={match_day}"
-    );
-    let response = self.get(&url).await?;
-    Ok(response)
-  }
-
-  pub async fn get_stats(
-    &self,
-    league_id: &str,
-  ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{league_id}/stats");
-    let response = self.get(&url).await?;
-    Ok(response)
-  }
-
-  pub async fn get_users(
-    &self,
-    league_id: &str,
-  ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{league_id}/users");
-    let response = self.get(&url).await?;
-    Ok(response)
-  }
-
-  pub async fn get_user_profile(
-    &self,
-    league_id: &str,
-    user_id: &str,
-  ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{league_id}/users/{user_id}");
-    let response = self.get(&url).await?;
-    Ok(response)
-  }
-
   pub async fn get_user_stats(
     &self,
     league_id: &str,
