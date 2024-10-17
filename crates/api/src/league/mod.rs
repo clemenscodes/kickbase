@@ -1,19 +1,66 @@
 pub mod get_leagues;
 
+use reqwest::Method;
+use serde_json::Value;
 use std::collections::HashMap;
 
 use super::{HttpClient, HttpClientError};
 use crate::HttpResponse;
-use reqwest::Method;
-use serde_json::Value;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct League {
   pub id: String,
   pub name: String,
   pub creator: String,
   pub creation: String,
   pub image: String,
+}
+
+impl From<&Value> for League {
+  fn from(value: &Value) -> Self {
+    let value = value.get("league").unwrap_or(value);
+
+    let name = value
+      .get("name")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let id = value
+      .get("id")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let creator = value
+      .get("creator")
+      .unwrap_or(value.get("creatorId").unwrap())
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let creation = value
+      .get("creation")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let image = value
+      .get("ci")
+      .map(|v| v.as_str().unwrap_or_default().to_string())
+      .unwrap_or_default();
+
+    League {
+      id,
+      name,
+      creator,
+      creation,
+      image,
+    }
+  }
 }
 
 impl HttpClient {
