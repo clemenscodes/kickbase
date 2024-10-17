@@ -9,7 +9,7 @@ pub mod player;
 pub mod user;
 
 use reqwest::{cookie::Jar, Client, ClientBuilder, Method, StatusCode, Url};
-use serde::Serialize;
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::{json, Value};
 use std::{
   collections::HashMap,
@@ -17,7 +17,7 @@ use std::{
 };
 use thiserror::Error;
 use tokio::sync::RwLock;
-use tracing::{debug, warn};
+use tracing::warn;
 
 const API: &str = "https://api.kickbase.com";
 
@@ -33,9 +33,40 @@ pub struct HttpClient {
 }
 
 #[derive(Debug)]
-pub struct HttpResponse<T: From<Value>> {
+pub struct SerializableStatusCode(StatusCode);
+
+impl SerializableStatusCode {
+  pub fn as_status(&self) -> StatusCode {
+    self.0
+  }
+}
+
+impl Serialize for SerializableStatusCode {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+  where
+    S: serde::Serializer,
+  {
+    serializer.serialize_u16(self.as_status().as_u16())
+  }
+}
+
+impl<'de> Deserialize<'de> for SerializableStatusCode {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: Deserializer<'de>,
+  {
+    let status_code = u16::deserialize(deserializer)?;
+
+    StatusCode::from_u16(status_code)
+      .map(SerializableStatusCode)
+      .map_err(serde::de::Error::custom)
+  }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct HttpResponse<T: From<serde_json::Value>> {
   pub value: T,
-  pub status: StatusCode,
+  pub status: SerializableStatusCode,
 }
 
 impl HttpClient {
@@ -55,108 +86,105 @@ impl HttpClient {
     self.req(method, endpoint, &json!({})).await
   }
 
-  pub async fn req<T: Serialize, K: From<Value>>(
+  pub async fn req<T: Serialize + ?Sized, K: From<Value>>(
     &self,
     method: Method,
     endpoint: &str,
     payload: &T,
   ) -> Result<HttpResponse<K>, HttpClientError> {
-    let url = self.base_url.join(endpoint).map_err(|err| {
-      warn!("Failed to construct URL: {err}");
-      HttpClientError::UrlParse(err)
-    })?;
+    let url = self.construct_url(endpoint)?;
 
-    let mut request = self.client.request(method.clone(), url.clone());
+    let mut response = self
+      .send_request(method.clone(), url.clone(), payload)
+      .await?;
 
-    request = request.json(payload);
+    let status = SerializableStatusCode(response.status());
 
-    let response = request.send().await.map_err(|err| {
-      warn!("Request failed: {err}");
-      HttpClientError::Reqwest(err)
-    })?;
-
-    debug!("{response:#?}");
-
-    let status = response.status();
-
-    if status == StatusCode::FORBIDDEN {
-      dotenvy::dotenv().unwrap();
-
-      let email = std::env::var("KICKBASE_EMAIL").map_err(|_| {
-        HttpClientError::MissingEnvVar("KICKBASE_EMAIL".to_string())
-      })?;
-      let password = std::env::var("KICKBASE_PASSWORD").map_err(|_| {
-        HttpClientError::MissingEnvVar("KICKBASE_PASSWORD".to_string())
-      })?;
-
-      let mut login_payload = HashMap::new();
-      login_payload.insert("email", email);
-      login_payload.insert("password", password);
-
-      let login_url = self.base_url.join("/user/login").map_err(|err| {
-        warn!("Failed to construct URL: {err}");
-        HttpClientError::UrlParse(err)
-      })?;
-
-      let login_request = self
-        .client
-        .request(Method::POST, login_url)
-        .json(&login_payload);
-
-      let response = login_request.send().await.map_err(|err| {
-        warn!("Request failed: {err}");
-        HttpClientError::Reqwest(err)
-      })?;
-
-      let status = response.status();
-
-      if status == StatusCode::FORBIDDEN {
-        return Err(HttpClientError::Forbidden);
-      }
-
-      let mut request = self.client.request(method, url);
-
-      request = request.json(payload);
-
-      let response = request.send().await.map_err(|err| {
-        warn!("Request failed: {err}");
-        HttpClientError::Reqwest(err)
-      })?;
-
-      let value: Value = response
-        .json()
-        .await
-        .map_err(|err| {
-          warn!("Failed to parse JSON: {err}");
-          err
-        })
-        .unwrap_or_default();
-
-      debug!("{value:#?}");
-
-      let value = value.into();
-
-      let response = HttpResponse { value, status };
-
-      return Ok(response);
+    if status.as_status() == StatusCode::FORBIDDEN {
+      self.env_login().await?;
+      response = self.send_request(method, url, payload).await?;
     }
 
-    let value: Value = response
-      .json()
+    self.process_response(response).await
+  }
+
+  fn construct_url(
+    &self,
+    endpoint: &str,
+  ) -> Result<reqwest::Url, HttpClientError> {
+    self.base_url.join(endpoint).map_err(|err| {
+      warn!("Failed to construct URL: {err}");
+      HttpClientError::UrlParse(err)
+    })
+  }
+
+  async fn send_request<T: Serialize + ?Sized>(
+    &self,
+    method: Method,
+    url: reqwest::Url,
+    payload: &T,
+  ) -> Result<reqwest::Response, HttpClientError> {
+    let request = self.client.request(method, url).json(payload);
+
+    request.send().await.map_err(|err| {
+      warn!("Request failed: {err}");
+      HttpClientError::Reqwest(err)
+    })
+  }
+
+  async fn env_login(&self) -> Result<(), HttpClientError> {
+    dotenvy::dotenv().unwrap();
+
+    let email = self.get_env_var("KICKBASE_EMAIL")?;
+    let password = self.get_env_var("KICKBASE_PASSWORD")?;
+
+    let mut login_payload = HashMap::new();
+    login_payload.insert("email", email);
+    login_payload.insert("password", password);
+
+    let login_url = self.construct_url("/user/login")?;
+
+    let response = self
+      .send_request(Method::POST, login_url, &login_payload)
+      .await?;
+
+    let status = SerializableStatusCode(response.status());
+
+    if status.as_status() == StatusCode::FORBIDDEN {
+      return Err(HttpClientError::Forbidden);
+    }
+
+    Ok(())
+  }
+
+  fn get_env_var(&self, key: &str) -> Result<String, HttpClientError> {
+    std::env::var(key)
+      .map_err(|_| HttpClientError::MissingEnvVar(key.to_string()))
+  }
+
+  async fn process_response<K: From<Value>>(
+    &self,
+    response: reqwest::Response,
+  ) -> Result<HttpResponse<K>, HttpClientError> {
+    let status = SerializableStatusCode(response.status());
+    let value = self.get_response_value(response).await;
+
+    Ok(HttpResponse { value, status })
+  }
+
+  async fn get_response_value<K: From<Value>>(
+    &self,
+    response: reqwest::Response,
+  ) -> K {
+    response
+      .json::<Value>()
       .await
       .map_err(|err| {
         warn!("Failed to parse JSON: {err}");
         err
       })
-      .unwrap_or_default();
-
-    debug!("{value:#?}");
-
-    let value = value.into();
-
-    let response = HttpResponse { value, status };
-
-    Ok(response)
+      .unwrap_or_default()
+      .into()
   }
 }
 
@@ -222,7 +250,7 @@ mod tests {
 
     assert!(result.is_ok());
     let response = result.unwrap();
-    assert_eq!(response.status, StatusCode::OK);
+    assert_eq!(response.status.as_status(), StatusCode::OK);
     assert_eq!(response.value, json!({"message": "success"}));
 
     mock.assert();
@@ -245,7 +273,7 @@ mod tests {
 
     assert!(result.is_ok());
     let response = result.unwrap();
-    assert_eq!(response.status, StatusCode::NOT_FOUND);
+    assert_eq!(response.status.as_status(), StatusCode::NOT_FOUND);
     assert_eq!(response.value, json!({"error": "Not Found"}));
 
     mock.assert();
@@ -274,7 +302,7 @@ mod tests {
 
     assert!(result.is_ok());
     let response = result.unwrap();
-    assert_eq!(response.status, StatusCode::CREATED);
+    assert_eq!(response.status.as_status(), StatusCode::CREATED);
     assert_eq!(response.value, json!({"message": "created"}));
 
     mock.assert();

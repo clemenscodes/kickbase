@@ -15,7 +15,7 @@ pub async fn route(Json(payload): Json<LoginPayload>) -> Response {
 
   let status = response.status;
 
-  if !status.is_success() {
+  if !status.as_status().is_success() {
     let template = Html {
       message: String::from("Invalid credentials"),
     };
