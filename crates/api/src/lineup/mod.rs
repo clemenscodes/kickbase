@@ -1,3 +1,4 @@
+pub mod formation;
 pub mod get_lineup;
 pub mod get_lineup_extended;
 
@@ -5,6 +6,7 @@ use super::{HttpClient, HttpClientError};
 use crate::HttpResponse;
 use reqwest::Method;
 use serde::Deserialize;
+use serde_json::Value;
 use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
@@ -17,9 +19,9 @@ impl HttpClient {
   pub async fn ligainsider(
     &self,
     league_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!("/sso/ligainsider?leagueId={}", league_id);
-    let response = self.get(Method::POST, &url, None).await?;
+    let response = self.get(Method::POST, &url).await?;
     Ok(response)
   }
 
@@ -27,7 +29,7 @@ impl HttpClient {
     &self,
     league_id: &str,
     payload: SetLineupPayload,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let mut map = HashMap::new();
     map.insert("type", payload.lineup_type);
     map.insert(
@@ -36,7 +38,7 @@ impl HttpClient {
     );
 
     let url = format!("/leagues/{}/lineup", league_id);
-    let response = self.req(Method::POST, &url, Some(&map), None).await?;
+    let response = self.req(Method::POST, &url, &map).await?;
     Ok(response)
   }
 }

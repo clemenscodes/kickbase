@@ -1,40 +1,64 @@
-use crate::{league::League, HttpClient, HttpClientError};
 use reqwest::Method;
+use serde_json::Value;
+
+use crate::{league::League, HttpClient, HttpClientError};
+
+impl From<&Value> for League {
+  fn from(value: &Value) -> Self {
+    let name = value
+      .get("name")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let id = value
+      .get("id")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let creator = value
+      .get("creator")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let creation = value
+      .get("creation")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let image = value
+      .get("ci")
+      .map(|v| v.as_str().unwrap_or_default().to_string())
+      .unwrap_or_default();
+
+    League {
+      id,
+      name,
+      creator,
+      creation,
+      image,
+    }
+  }
+}
 
 impl HttpClient {
   pub async fn get_leagues(&self) -> Result<Vec<League>, HttpClientError> {
-    let response = self.get(Method::GET, "/leagues", None).await.unwrap();
-
-    let leagues: Vec<League> = response
+    let response = self.get::<Value>(Method::GET, "/leagues").await?;
+    let leagues = response
       .value
       .get("leagues")
       .unwrap()
       .as_array()
       .unwrap()
       .iter()
-      .map(|league| {
-        let name = league.get("name").unwrap().to_string().replace("\"", "");
-        let id = league.get("id").unwrap().to_string().replace("\"", "");
-        let creator =
-          league.get("creator").unwrap().to_string().replace("\"", "");
-        let creation = league
-          .get("creation")
-          .unwrap()
-          .to_string()
-          .replace("\"", "");
-        let image = league
-          .get("ci")
-          .map(|value| value.to_string().replace("\"", ""))
-          .unwrap_or_default();
-
-        League {
-          id,
-          name,
-          creator,
-          creation,
-          image,
-        }
-      })
+      .map(League::from)
       .collect();
 
     Ok(leagues)

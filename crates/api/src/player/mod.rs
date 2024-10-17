@@ -1,53 +1,123 @@
-use super::{HttpClient, HttpClientError};
-use crate::HttpResponse;
-use reqwest::Method;
+use serde_json::Value;
 
-impl HttpClient {
-  pub async fn get_player_info(
-    &self,
-    league_id: &str,
-    player_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let url = format!("/leagues/{}/players/{}", league_id, player_id);
-    let response = self.get(Method::GET, &url, None).await?;
-    Ok(response)
-  }
+pub mod get_player_feed;
+pub mod get_player_info;
+pub mod get_player_points;
+pub mod get_player_stats;
+pub mod search_competition_players;
 
-  pub async fn get_player_feed(
-    &self,
-    league_id: &str,
-    player_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let url = format!("/leagues/{}/players/{}/feed", league_id, player_id);
-    let response = self.get(Method::GET, &url, None).await?;
-    Ok(response)
-  }
+#[derive(Debug, Clone)]
+pub struct Player {
+  pub id: String,
+  pub first_name: String,
+  pub last_name: String,
+  pub average_points: u16,
+  pub market_value: f32,
+  pub market_value_trend: u8,
+  pub number: u8,
+  pub position: u8,
+  pub image: String,
+  pub team_id: String,
+  pub team_name: String,
+  pub team_symbol: String,
+  pub total_points: u16,
+}
 
-  pub async fn get_player_points(
-    &self,
-    player_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let url = format!("/players/{}/points", player_id);
-    let response = self.get(Method::GET, &url, None).await?;
-    Ok(response)
-  }
+impl From<Value> for Player {
+  fn from(value: Value) -> Self {
+    let id = value
+      .get("id")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
 
-  pub async fn get_player_stats(
-    &self,
-    league_id: &str,
-    player_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let url = format!("/leagues/{}/players/{}/stats", league_id, player_id);
-    let response = self.get(Method::GET, &url, None).await?;
-    Ok(response)
-  }
+    let first_name = value
+      .get("firstName")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
 
-  pub async fn search_competition_players(
-    &self,
-    query: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let url = format!("/competition/search?query={}", query);
-    let response = self.get(Method::GET, &url, None).await?;
-    Ok(response)
+    let last_name = value
+      .get("lastName")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let average_points = value
+      .get("averagePoints")
+      .unwrap()
+      .as_u64()
+      .unwrap_or_default() as u16;
+
+    let market_value = value
+      .get("marketValue")
+      .unwrap()
+      .as_f64()
+      .unwrap_or_default() as f32;
+
+    let market_value_trend = value
+      .get("marketValueTrend")
+      .unwrap()
+      .as_u64()
+      .unwrap_or_default() as u8;
+
+    let number =
+      value.get("number").unwrap().as_u64().unwrap_or_default() as u8;
+
+    let position =
+      value.get("position").unwrap().as_u64().unwrap_or_default() as u8;
+
+    let image = value
+      .get("profileBig")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let team_id = value
+      .get("teamId")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let team_name = value
+      .get("teamName")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let team_symbol = value
+      .get("teamSymbol")
+      .unwrap()
+      .as_str()
+      .unwrap_or_default()
+      .to_string();
+
+    let total_points = value
+      .get("totalPoints")
+      .unwrap()
+      .as_u64()
+      .unwrap_or_default() as u16;
+
+    Self {
+      id,
+      first_name,
+      last_name,
+      average_points,
+      market_value,
+      market_value_trend,
+      number,
+      position,
+      image,
+      team_id,
+      team_name,
+      team_symbol,
+      total_points,
+    }
   }
 }

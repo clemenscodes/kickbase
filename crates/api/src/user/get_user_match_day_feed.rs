@@ -1,14 +1,16 @@
-use crate::{HttpClient, HttpClientError, HttpResponse};
 use reqwest::Method;
+use serde_json::Value;
+
+use crate::{HttpClient, HttpClientError, HttpResponse};
 
 impl HttpClient {
   pub async fn get_user_match_day_feed(
     &self,
     league_id: &str,
     user_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!("/leagues/{}/users/{}/feed", league_id, user_id);
-    let response = self.get(Method::GET, &url, None).await?;
+    let response = self.get(Method::GET, &url).await?;
     Ok(response)
   }
 }

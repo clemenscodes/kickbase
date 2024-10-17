@@ -1,32 +1,14 @@
-use crate::{league::League, HttpClient, HttpClientError};
 use reqwest::Method;
 
-#[derive(Debug)]
-pub struct User {
-  pub name: String,
-  pub id: String,
-  pub image: String,
-  pub leagues: Vec<League>,
-}
+use super::User;
+use crate::{HttpClient, HttpClientError};
 
 impl HttpClient {
   pub async fn get_user(&self) -> Result<User, HttpClientError> {
-    let response = self.get(Method::GET, "/user/me", None).await?;
-    let user = response.value.get("user").unwrap();
+    let mut response = self.get::<User>(Method::GET, "/user/me").await?;
     let leagues = self.get_leagues().await?;
-    let image = user
-      .get("profile")
-      .map(|value| value.to_string().replace("\"", ""))
-      .unwrap_or_default();
-
-    let user = User {
-      id: user.get("id").unwrap().to_string().replace("\"", ""),
-      name: user.get("name").unwrap().to_string().replace("\"", ""),
-      image,
-      leagues,
-    };
-
-    Ok(user)
+    response.value.leagues = leagues;
+    Ok(response.value)
   }
 }
 

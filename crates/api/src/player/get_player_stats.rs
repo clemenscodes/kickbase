@@ -3,16 +3,13 @@ use reqwest::Method;
 use serde_json::Value;
 
 impl HttpClient {
-  pub async fn refresh_chat_token(
+  pub async fn get_player_stats(
     &self,
+    league_id: &str,
+    player_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let response = self.get(Method::POST, "/user/refreshchattoken").await?;
+    let url = format!("/leagues/{}/players/{}/stats", league_id, player_id);
+    let response = self.get(Method::GET, &url).await?;
     Ok(response)
   }
-}
-
-#[cfg(test)]
-mod tests {
-  #[tokio::test]
-  async fn test_refresh_chat_token() {}
 }

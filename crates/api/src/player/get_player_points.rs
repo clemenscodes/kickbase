@@ -1,13 +1,14 @@
-use super::{HttpClient, HttpClientError};
-use crate::HttpResponse;
 use reqwest::Method;
 use serde_json::Value;
 
+use crate::{HttpClient, HttpClientError, HttpResponse};
+
 impl HttpClient {
-  pub async fn get_achievements(
+  pub async fn get_player_points(
     &self,
+    player_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = "/achievements".to_string();
+    let url = format!("/players/{}/points", player_id);
     let response = self.get(Method::GET, &url).await?;
     Ok(response)
   }
