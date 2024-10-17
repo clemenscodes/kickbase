@@ -1,10 +1,9 @@
 use crate::{HttpClient, HttpClientError, HttpResponse};
 use reqwest::Method;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
 
-#[derive(Deserialize, Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LoginPayload {
   pub email: String,
   pub password: String,
@@ -15,11 +14,7 @@ impl HttpClient {
     &self,
     payload: LoginPayload,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let mut map = HashMap::new();
-    map.insert("email", payload.email);
-    map.insert("password", payload.password);
-
-    let response = self.req(Method::POST, "/user/login", &map).await?;
+    let response = self.req(Method::POST, "/user/login", &payload).await?;
 
     Ok(response)
   }

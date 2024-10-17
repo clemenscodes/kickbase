@@ -1,4 +1,3 @@
-use reqwest::Method;
 use serde_json::Value;
 
 use crate::{HttpClient, HttpClientError, HttpResponse};
@@ -9,8 +8,8 @@ impl HttpClient {
     league_id: &str,
     user_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/users/{}/feed", league_id, user_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/users/{user_id}/feed");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 }

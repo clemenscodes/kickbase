@@ -1,4 +1,3 @@
-use reqwest::Method;
 use serde_json::Value;
 
 use super::{formation::Formation, HttpClient, HttpClientError};
@@ -17,8 +16,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/lineup", league_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/lineup");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 }

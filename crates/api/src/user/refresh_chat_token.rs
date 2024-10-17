@@ -1,12 +1,11 @@
 use crate::{HttpClient, HttpClientError, HttpResponse};
-use reqwest::Method;
 use serde_json::Value;
 
 impl HttpClient {
   pub async fn refresh_chat_token(
     &self,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let response = self.get(Method::POST, "/user/refreshchattoken").await?;
+    let response = self.post("/user/refreshchattoken").await?;
     Ok(response)
   }
 }

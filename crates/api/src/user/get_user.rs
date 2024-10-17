@@ -1,11 +1,9 @@
-use reqwest::Method;
-
 use super::User;
 use crate::{HttpClient, HttpClientError};
 
 impl HttpClient {
   pub async fn get_user(&self) -> Result<User, HttpClientError> {
-    let mut response = self.get::<User>(Method::GET, "/user/me").await?;
+    let mut response = self.get::<User>("/user/me").await?;
     let leagues = self.get_leagues().await?;
     response.value.leagues = leagues;
     Ok(response.value)

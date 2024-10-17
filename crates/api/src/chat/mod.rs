@@ -1,24 +1,27 @@
 use super::{HttpClient, HttpClientError};
 use crate::HttpResponse;
 use reqwest::Method;
-use serde::Deserialize;
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
-#[derive(Deserialize, Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ChatMessagePayload {
   pub message: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CustomTokenPayload {
+  pub token: String,
 }
 
 impl HttpClient {
   pub async fn exchange_custom_token(
     &self,
-    custom_token: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let mut map = HashMap::new();
-    map.insert("token", custom_token.to_string());
-
-    let url = "/chat/exchangetoken".to_string();
-    let response = self.req(Method::POST, &url, Some(&map), None).await?;
+    payload: CustomTokenPayload,
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
+    let response = self
+      .req(Method::POST, "/chat/exchangetoken", &payload)
+      .await?;
     Ok(response)
   }
 
@@ -26,21 +29,18 @@ impl HttpClient {
     &self,
     league_id: &str,
     payload: ChatMessagePayload,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let mut map = HashMap::new();
-    map.insert("message", payload.message);
-
-    let url = format!("/leagues/{}/chat", league_id);
-    let response = self.req(Method::POST, &url, Some(&map), None).await?;
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
+    let url = format!("/leagues/{league_id}/chat");
+    let response = self.req(Method::POST, &url, &payload).await?;
     Ok(response)
   }
 
   pub async fn get_messages(
     &self,
     league_id: &str,
-  ) -> Result<HttpResponse, HttpClientError> {
-    let url = format!("/leagues/{}/chat/messages", league_id);
-    let response = self.get(Method::GET, &url, None).await?;
+  ) -> Result<HttpResponse<Value>, HttpClientError> {
+    let url = format!("/leagues/{league_id}/chat/messages");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 }

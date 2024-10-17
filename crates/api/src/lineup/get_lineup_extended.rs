@@ -1,6 +1,5 @@
 use super::{formation::Formation, HttpClient, HttpClientError};
 use crate::{league::League, player::Player, HttpResponse};
-use reqwest::Method;
 use serde_json::Value;
 
 #[derive(Debug)]
@@ -42,8 +41,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<ExtendedLineup>, HttpClientError> {
-    let url = format!("/leagues/{}/lineupex", league_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/lineupex");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 }

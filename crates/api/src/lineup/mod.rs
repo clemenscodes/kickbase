@@ -20,8 +20,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/sso/ligainsider?leagueId={}", league_id);
-    let response = self.get(Method::POST, &url).await?;
+    let url = format!("/sso/ligainsider?leagueId={league_id}");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -37,7 +37,7 @@ impl HttpClient {
       serde_json::to_string(&payload.players).unwrap_or_default(),
     );
 
-    let url = format!("/leagues/{}/lineup", league_id);
+    let url = format!("/leagues/{league_id}/lineup");
     let response = self.req(Method::POST, &url, &map).await?;
     Ok(response)
   }
