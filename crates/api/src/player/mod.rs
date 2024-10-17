@@ -23,8 +23,8 @@ pub struct Player {
   pub total_points: u16,
 }
 
-impl From<Value> for Player {
-  fn from(value: Value) -> Self {
+impl From<&Value> for Player {
+  fn from(value: &Value) -> Self {
     let id = value
       .get("id")
       .unwrap()
@@ -119,5 +119,11 @@ impl From<Value> for Player {
       team_symbol,
       total_points,
     }
+  }
+}
+
+impl From<Value> for Player {
+  fn from(value: Value) -> Self {
+    Self::from(&value)
   }
 }
