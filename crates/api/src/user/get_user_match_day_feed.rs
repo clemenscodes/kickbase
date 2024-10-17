@@ -10,7 +10,7 @@ impl HttpClient {
     user_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!("/leagues/{}/users/{}/feed", league_id, user_id);
-    let response = self.get::<Value>(Method::GET, &url).await?;
+    let response = self.get(Method::GET, &url).await?;
     Ok(response)
   }
 }

@@ -6,9 +6,7 @@ impl HttpClient {
   pub async fn refresh_chat_token(
     &self,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let response = self
-      .get::<Value>(Method::POST, "/user/refreshchattoken")
-      .await?;
+    let response = self.get(Method::POST, "/user/refreshchattoken").await?;
     Ok(response)
   }
 }

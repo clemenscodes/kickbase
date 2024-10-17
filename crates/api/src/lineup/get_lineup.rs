@@ -1,7 +1,8 @@
-use super::{formation::Formation, HttpClient, HttpClientError};
-use crate::{player::get_player_info::Player, HttpResponse};
 use reqwest::Method;
 use serde_json::Value;
+
+use super::{formation::Formation, HttpClient, HttpClientError};
+use crate::{player::Player, HttpResponse};
 
 pub const PLAYERS: usize = 11;
 

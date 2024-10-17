@@ -8,7 +8,7 @@ impl HttpClient {
     query: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!("/competition/search?query={}", query);
-    let response = self.get::<Value>(Method::GET, &url).await?;
+    let response = self.get(Method::GET, &url).await?;
     Ok(response)
   }
 }

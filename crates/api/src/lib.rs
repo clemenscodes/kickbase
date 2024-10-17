@@ -123,36 +123,36 @@ impl HttpClient {
         HttpClientError::Reqwest(err)
       })?;
 
-      let value = response
-        .json::<Value>()
+      let value: Value = response
+        .json()
         .await
         .map_err(|err| {
           warn!("Failed to parse JSON: {err}");
           err
         })
-        .unwrap_or_else(|_| json!({}));
+        .unwrap_or_default();
 
       debug!("{value:#?}");
 
-      let value: K = value.into();
+      let value = value.into();
 
       let response = HttpResponse { value, status };
 
       return Ok(response);
     }
 
-    let value = response
-      .json::<Value>()
+    let value: Value = response
+      .json()
       .await
       .map_err(|err| {
         warn!("Failed to parse JSON: {err}");
         err
       })
-      .unwrap_or_else(|_| json!({}));
+      .unwrap_or_default();
 
     debug!("{value:#?}");
 
-    let value: K = value.into();
+    let value = value.into();
 
     let response = HttpResponse { value, status };
 
@@ -182,8 +182,7 @@ pub enum HttpClientError {
 mod tests {
   use super::*;
   use httpmock::MockServer;
-  use reqwest::Method;
-  use reqwest::StatusCode;
+  use reqwest::{Method, StatusCode};
   use serde_json::json;
 
   pub const TEST_USER_ID: &str = "3408447";
