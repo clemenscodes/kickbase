@@ -1,11 +1,10 @@
-use reqwest::Method;
 use serde_json::Value;
 
 use crate::{league::League, HttpClient, HttpClientError};
 
 impl HttpClient {
   pub async fn get_leagues(&self) -> Result<Vec<League>, HttpClientError> {
-    let response = self.get::<Value>(Method::GET, "/leagues").await?;
+    let response = self.get::<Value>("/leagues").await?;
 
     let leagues = response
       .value

@@ -17,8 +17,8 @@ pub struct User {
   pub leagues: Vec<League>,
 }
 
-impl From<Value> for User {
-  fn from(value: Value) -> Self {
+impl From<&Value> for User {
+  fn from(value: &Value) -> Self {
     let user = value.get("user").unwrap();
 
     let id = user
@@ -48,5 +48,11 @@ impl From<Value> for User {
       image,
       leagues,
     }
+  }
+}
+
+impl From<Value> for User {
+  fn from(value: Value) -> Self {
+    Self::from(&value)
   }
 }

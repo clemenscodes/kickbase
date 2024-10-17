@@ -1,13 +1,13 @@
+pub mod comment_league;
 pub mod get_leagues;
 
-use reqwest::Method;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
 
 use super::{HttpClient, HttpClientError};
 use crate::HttpResponse;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct League {
   pub id: String,
   pub name: String,
@@ -69,8 +69,8 @@ impl HttpClient {
     league_id: &str,
     feed_item_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/feed/{}/comments", league_id, feed_item_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/feed/{feed_item_id}/comments");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -79,8 +79,8 @@ impl HttpClient {
     league_id: &str,
     start: u64,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/feed?start={}", league_id, start);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/feed?start={start}");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -88,8 +88,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/info", league_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/info");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -100,10 +100,9 @@ impl HttpClient {
     match_day: u64,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = format!(
-      "/leagues/{}/users/{}/players?matchDay={}",
-      league_id, user_id, match_day
+      "/leagues/{league_id}/users/{user_id}/players?matchDay={match_day}"
     );
-    let response = self.get(Method::GET, &url).await?;
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -111,8 +110,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/stats", league_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/stats");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -120,8 +119,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/users", league_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/users");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -130,8 +129,8 @@ impl HttpClient {
     league_id: &str,
     user_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/users/{}", league_id, user_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/users/{user_id}");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -140,8 +139,8 @@ impl HttpClient {
     league_id: &str,
     user_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/users/{}/stats", league_id, user_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/users/{user_id}/stats");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -150,8 +149,8 @@ impl HttpClient {
     league_id: &str,
     user_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/users/{}/players", league_id, user_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/users/{user_id}/players");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -159,8 +158,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/me", league_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/me");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -168,8 +167,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/quickstats", league_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/quickstats");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -177,21 +176,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/commentfeed", league_id);
-    let response = self.get(Method::GET, &url).await?;
-    Ok(response)
-  }
-
-  pub async fn comment_league(
-    &self,
-    league_id: &str,
-    comment: &str,
-  ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let mut map = HashMap::new();
-    map.insert("comment", comment.to_string());
-
-    let url = format!("/leagues/{}/comment", league_id);
-    let response = self.req(Method::POST, &url, &map).await?;
+    let url = format!("/leagues/{league_id}/commentfeed");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 }

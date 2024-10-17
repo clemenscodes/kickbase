@@ -1,5 +1,3 @@
-use reqwest::Method;
-
 use super::Player;
 use crate::{HttpClient, HttpClientError, HttpResponse};
 
@@ -9,8 +7,8 @@ impl HttpClient {
     league_id: &str,
     player_id: &str,
   ) -> Result<HttpResponse<Player>, HttpClientError> {
-    let url = format!("/leagues/{}/players/{}", league_id, player_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/players/{player_id}");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 }

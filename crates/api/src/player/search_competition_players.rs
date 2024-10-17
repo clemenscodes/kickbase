@@ -1,5 +1,4 @@
 use crate::{HttpClient, HttpClientError, HttpResponse};
-use reqwest::Method;
 use serde_json::Value;
 
 impl HttpClient {
@@ -7,8 +6,8 @@ impl HttpClient {
     &self,
     query: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/competition/search?query={}", query);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/competition/search?query={query}");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 }

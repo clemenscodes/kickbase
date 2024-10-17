@@ -1,13 +1,12 @@
 use super::{HttpClient, HttpClientError};
 use crate::HttpResponse;
 use reqwest::Method;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
 
-#[derive(Deserialize, Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ChatMessagePayload {
-  pub message: String,
+  pub m: String,
 }
 
 impl HttpClient {
@@ -16,8 +15,8 @@ impl HttpClient {
     league_id: &str,
     start: u64,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/live/chat?start={}", league_id, start);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/live/chat?start={start}");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -25,8 +24,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/live", league_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/live");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -35,8 +34,8 @@ impl HttpClient {
     league_id: &str,
     match_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/live/matches/{}", league_id, match_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/live/matches/{match_id}");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -44,8 +43,8 @@ impl HttpClient {
     &self,
     league_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/live/notlinedupplayers", league_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/live/notlinedupplayers");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -54,8 +53,8 @@ impl HttpClient {
     league_id: &str,
     player_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/leagues/{}/live/players/{}", league_id, player_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/leagues/{league_id}/live/players/{player_id}");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -63,7 +62,7 @@ impl HttpClient {
     &self,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
     let url = "/live/top10".to_string();
-    let response = self.get(Method::GET, &url).await?;
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
@@ -71,16 +70,15 @@ impl HttpClient {
     &self,
     team_id: &str,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = format!("/live/teams/{}/players", team_id);
-    let response = self.get(Method::GET, &url).await?;
+    let url = format!("/live/teams/{team_id}/players");
+    let response = self.get(&url).await?;
     Ok(response)
   }
 
   pub async fn get_team_ranking(
     &self,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let url = "/live/teamranking".to_string();
-    let response = self.get(Method::GET, &url).await?;
+    let response = self.get("/live/teamranking").await?;
     Ok(response)
   }
 
@@ -89,11 +87,8 @@ impl HttpClient {
     league_id: &str,
     payload: ChatMessagePayload,
   ) -> Result<HttpResponse<Value>, HttpClientError> {
-    let mut map = HashMap::new();
-    map.insert("m", payload.message);
-
-    let url = format!("/leagues/{}/live/chat", league_id);
-    let response = self.req(Method::POST, &url, &map).await?;
+    let url = format!("/leagues/{league_id}/live/chat");
+    let response = self.req(Method::POST, &url, &payload).await?;
     Ok(response)
   }
 }

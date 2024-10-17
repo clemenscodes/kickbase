@@ -1,4 +1,5 @@
 pub mod achievements;
+pub mod chat;
 pub mod competition;
 pub mod gift;
 pub mod league;
@@ -11,13 +12,11 @@ pub mod user;
 use reqwest::{cookie::Jar, Client, ClientBuilder, Method, StatusCode, Url};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::{json, Value};
-use std::{
-  collections::HashMap,
-  sync::{Arc, LazyLock},
-};
+use std::sync::{Arc, LazyLock};
 use thiserror::Error;
 use tokio::sync::RwLock;
 use tracing::warn;
+use user::login::LoginPayload;
 
 const API: &str = "https://api.kickbase.com";
 
@@ -80,10 +79,23 @@ impl HttpClient {
 
   pub async fn get<T: From<Value>>(
     &self,
-    method: Method,
     endpoint: &str,
   ) -> Result<HttpResponse<T>, HttpClientError> {
-    self.req(method, endpoint, &json!({})).await
+    self.req(Method::GET, endpoint, &json!({})).await
+  }
+
+  pub async fn post<T: From<Value>>(
+    &self,
+    endpoint: &str,
+  ) -> Result<HttpResponse<T>, HttpClientError> {
+    self.req(Method::POST, endpoint, &json!({})).await
+  }
+
+  pub async fn delete<T: From<Value>>(
+    &self,
+    endpoint: &str,
+  ) -> Result<HttpResponse<T>, HttpClientError> {
+    self.req(Method::DELETE, endpoint, &json!({})).await
   }
 
   pub async fn req<T: Serialize + ?Sized, K: From<Value>>(
@@ -135,14 +147,11 @@ impl HttpClient {
   async fn env_login(&self) -> Result<(), HttpClientError> {
     dotenvy::dotenv().unwrap();
 
+    let login_url = self.construct_url("/user/login")?;
     let email = self.get_env_var("KICKBASE_EMAIL")?;
     let password = self.get_env_var("KICKBASE_PASSWORD")?;
 
-    let mut login_payload = HashMap::new();
-    login_payload.insert("email", email);
-    login_payload.insert("password", password);
-
-    let login_url = self.construct_url("/user/login")?;
+    let login_payload = LoginPayload { email, password };
 
     let response = self
       .send_request(Method::POST, login_url, &login_payload)
@@ -246,7 +255,7 @@ mod tests {
     });
 
     let client = HttpClient::new(&server.url("")).unwrap();
-    let result = client.get::<Value>(Method::GET, "/test").await;
+    let result = client.get::<Value>("/test").await;
 
     assert!(result.is_ok());
     let response = result.unwrap();
@@ -269,7 +278,7 @@ mod tests {
     });
 
     let client = HttpClient::new(&server.url("")).unwrap();
-    let result = client.get::<Value>(Method::GET, "/not-found").await;
+    let result = client.get::<Value>("/not-found").await;
 
     assert!(result.is_ok());
     let response = result.unwrap();
